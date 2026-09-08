@@ -1,30 +1,25 @@
-import { useEffect, useRef, useState } from 'react';
-import { formatClock, isNight, setState, useGameState, type Contact } from '../state/store';
-import { chooseOption, getPendingChoice, markRead, pushMessage } from '../story/engine';
+import { useEffect, useRef } from 'react';
+import { formatClock, setState, useGameState, type Contact } from '../state/store';
+import { chooseOption, getPendingChoice, markRead, sayIdle } from '../story/engine';
 import { CONVERSATIONS } from '../story/content';
+import { idleOpeners } from '../story/social';
 import { renderPhoto } from '../story/photos';
 import { avatar } from '../story/avatars';
 import { playSound } from '../os/sounds';
 import { CONTACT_INFO } from './contacts';
 
-const IDLE_REPLIES: Record<Contact, string[]> = {
-  mayu: ['ахах', 'ок ✌🏻', 'потом расскажу, я с мамой', 'НАНА иди спать', 'ты опять за компом?', 'ага'],
-  ren: ['…', 'да', 'я тут', 'читаю', 'не спится?', 'ты как?', 'потом'],
-};
-
-let idleTimer: ReturnType<typeof setTimeout> | null = null;
-
 export function Chat({ contact, channel }: { contact: Contact; channel: 'meromero' | 'messenger' }) {
   const s = useGameState();
-  const [text, setText] = useState('');
   const logRef = useRef<HTMLDivElement>(null);
   const info = CONTACT_INFO[contact];
   const msgs = s.messages.filter((m) => m.contact === contact);
   const online = contact === 'ren' ? s.renOnline : s.mayuOnline;
+  const typing = contact === 'ren' ? s.renTyping : s.mayuTyping;
   const gone = contact === 'ren' && !!s.flags.ren_gone;
   const pending = s.pendingChoice;
   const pendingConv = pending ? CONVERSATIONS.find((c) => c.id === pending.conversation) : null;
   const choice = pendingConv && pendingConv.contact === contact ? getPendingChoice() : null;
+  const openers = !choice && !s.activeConversation && !gone ? idleOpeners(contact, s) : [];
   const unread = s.unread[contact];
 
   useEffect(() => {
@@ -33,25 +28,7 @@ export function Chat({ contact, channel }: { contact: Contact; channel: 'meromer
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: 1e9, behavior: 'smooth' });
-  }, [msgs.length, s.renTyping, choice]);
-
-  function send() {
-    const t = text.trim();
-    if (!t) return;
-    setText('');
-    playSound('click');
-    pushMessage({ from: 'nana', contact, text: t, channel });
-    if (contact === 'ren' && isNight(s)) setState((st) => ({ ren: st.ren + 0.25 }));
-    if (!online || gone || s.activeConversation) return;
-    if (idleTimer) clearTimeout(idleTimer);
-    const pool = IDLE_REPLIES[contact];
-    const reply = pool[(s.nextMessageId + t.length) % pool.length];
-    if (contact === 'ren') setState({ renTyping: true });
-    idleTimer = setTimeout(() => {
-      if (contact === 'ren') setState({ renTyping: false });
-      pushMessage({ from: contact, contact, text: reply, channel });
-    }, 1800 + reply.length * 60);
-  }
+  }, [msgs.length, typing, choice]);
 
   return (
     <div className="chat">
@@ -61,7 +38,7 @@ export function Chat({ contact, channel }: { contact: Contact; channel: 'meromer
           <div className="nm">{gone ? 'пользователь не найден' : info.name}</div>
           <div className="st">
             <i className={`dot ${!gone && online ? 'on' : 'off'}`} /> {gone ? 'USER NOT FOUND' : online ? 'в сети' : 'не в сети'}
-            {channel === 'meromero' ? ' · личные сообщения meromero.net' : ' · M Messenger'}
+            {channel === 'meromero' ? ' · сообщения meromero' : ' · M Messenger'}
           </div>
         </div>
       </div>
@@ -74,7 +51,7 @@ export function Chat({ contact, channel }: { contact: Contact; channel: 'meromer
             {m.from !== 'system' && <span className="time">{formatClock(m.time)}</span>}
           </div>
         ))}
-        {contact === 'ren' && s.renTyping && <div className="typing">{info.name} печатает</div>}
+        {typing && <div className="typing">{info.name} печатает</div>}
       </div>
       {choice ? (
         <div className="choices">
@@ -86,19 +63,24 @@ export function Chat({ contact, channel }: { contact: Contact; channel: 'meromer
         </div>
       ) : gone ? (
         <div className="chat-hint">Этот пользователь удалил аккаунт или был удалён.</div>
+      ) : openers.length ? (
+        <div className="choices quiet">
+          {openers.map((o) => (
+            <button
+              key={o.key}
+              className="choice"
+              onClick={() => {
+                playSound('click');
+                setState((st) => ({ flags: { ...st.flags, [`idle_${contact}_${o.key}_d${st.day}`]: true } }));
+                sayIdle(contact, o, channel);
+              }}
+            >
+              {o.text}
+            </button>
+          ))}
+        </div>
       ) : (
-        <form
-          className="chat-input"
-          onSubmit={(e) => {
-            e.preventDefault();
-            send();
-          }}
-        >
-          <input className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder={online ? 'Написать сообщение…' : 'Не в сети — сообщение будет доставлено позже'} />
-          <button className="btn primary" type="submit">
-            Отпр.
-          </button>
-        </form>
+        <div className="chat-hint">{s.activeConversation ? '…' : online ? 'Нане нечего сказать. Пока.' : `${info.name} не в сети`}</div>
       )}
     </div>
   );

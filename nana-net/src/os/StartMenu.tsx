@@ -5,7 +5,7 @@ import { goToSleep } from '../story/engine';
 import { avatar } from '../story/avatars';
 import { playSound } from './sounds';
 
-const APPS: AppId[] = ['browser', 'messenger', 'explorer', 'notepad', 'photos', 'music', 'camera', 'paint', 'personalize'];
+const APPS: AppId[] = ['meromero', 'messenger', 'explorer', 'notepad', 'photos', 'music', 'camera', 'paint', 'personalize'];
 
 export function StartMenu() {
   const s = useGameState();
@@ -31,7 +31,7 @@ export function StartMenu() {
   }, [open_]);
 
   if (!open_) return null;
-  const apps = APPS.filter((a) => a !== 'messenger' || s.messengerInstalled).filter((a) => !q || APP_META[a].title.toLowerCase().includes(q.toLowerCase()));
+  const apps = APPS.filter((a) => !q || APP_META[a].title.toLowerCase().includes(q.toLowerCase()));
 
   function open(app: AppId, props?: Record<string, unknown>) {
     openWindow(app, props);

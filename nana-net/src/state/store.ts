@@ -8,7 +8,7 @@ export type AppId =
   | 'photos'
   | 'music'
   | 'camera'
-  | 'browser'
+  | 'meromero'
   | 'messenger'
   | 'paint'
   | 'personalize'
@@ -51,6 +51,7 @@ export interface Post {
   likes: number;
   photo?: string;
   comments: { author: string; text: string }[];
+  likedBy?: string[];
 }
 
 export interface Profile {
@@ -78,7 +79,7 @@ export interface GameState {
   renOnline: boolean;
   mayuOnline: boolean;
   renTyping: boolean;
-  messengerInstalled: boolean;
+  mayuTyping: boolean;
   windows: WindowState[];
   nextWindowId: number;
   nextMessageId: number;
@@ -92,7 +93,7 @@ export interface GameState {
   sleepCount: number;
 }
 
-const SAVE_KEY = 'nana-net-save-v1';
+const SAVE_KEY = 'nana-net-save-v2';
 
 export function initialState(): GameState {
   return {
@@ -113,7 +114,7 @@ export function initialState(): GameState {
     renOnline: false,
     mayuOnline: true,
     renTyping: false,
-    messengerInstalled: false,
+    mayuTyping: false,
     windows: [],
     nextWindowId: 1,
     nextMessageId: 1,
@@ -144,6 +145,7 @@ function load(): GameState {
         windows: [],
         toasts: [],
         renTyping: false,
+        mayuTyping: false,
         activeConversation: null,
         pendingChoice: null,
         startOpen: false,
@@ -212,9 +214,9 @@ export function isNight(s: GameState) {
 
 export function stage(s: GameState): 0 | 1 | 2 | 3 {
   // 0 = cosy start, 1 = ren appears, 2 = dependence, 3 = late
-  const score = s.day + s.ren / 4;
-  if (s.day <= 1) return 0;
-  if (score < 4) return 1;
+  const score = s.day + s.ren / 5;
+  if (s.day <= 2) return 0;
+  if (score < 5) return 1;
   if (score < 7) return 2;
   return 3;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useGameState, type WindowState } from '../state/store';
+import { setState, useGameState, type WindowState } from '../state/store';
 import { REN_SONG, SONGS } from '../story/fs';
 import { playMusic, stopMusic } from '../os/sounds';
 
@@ -21,6 +21,7 @@ export function Music({ win }: { win: WindowState }) {
     }
     playMusic(idx + 1, track === REN_SONG);
     setPos(0);
+    if (track === REN_SONG) setState((st) => (st.flags.listened_ren_song ? {} : { flags: { ...st.flags, listened_ren_song: true }, ren: st.ren + 1 }));
     const t = setInterval(() => setPos((p) => (p + 1 >= track.len ? (setIdx((i) => (i + 1) % tracks.length), 0) : p + 1)), 1000);
     return () => {
       clearInterval(t);

@@ -31,8 +31,8 @@ export function Messenger({ win }: { win: WindowState }) {
   const pendingConv = s.pendingChoice ? CONVERSATIONS.find((c) => c.id === s.pendingChoice!.conversation) : null;
   const status = s.day >= 5 ? 'не сплю' : s.day >= 3 ? 'онлайн' : s.profile.status || 'привет';
   const contacts: { id: Contact; online: boolean; group: string }[] = [
-    { id: 'ren', online: s.renOnline && !s.flags.ren_gone, group: 'Избранное' },
-    { id: 'mayu', online: s.mayuOnline, group: 'Друзья' },
+    ...(s.flags.ren_known ? [{ id: 'ren' as Contact, online: s.renOnline && !s.flags.ren_gone, group: s.ren >= 6 ? 'Избранное' : 'Друзья' }] : []),
+    { id: 'mayu', online: s.mayuOnline, group: s.ren >= 6 ? 'Друзья' : 'Избранное' },
   ];
   const others = ['yuki_02', 'kaori.k', 'sensei_bot'];
 
@@ -82,7 +82,7 @@ export function Messenger({ win }: { win: WindowState }) {
       </div>
       <div className="statusbar">
         <span>M Messenger 2.1</span>
-        <span>{s.renOnline && !s.flags.ren_gone ? 'REN_17 в сети' : 'REN_17 не в сети'}</span>
+        <span>{s.flags.ren_known ? (s.renOnline && !s.flags.ren_gone ? 'REN_17 в сети' : 'REN_17 не в сети') : `${contacts.filter((c) => c.online).length} в сети`}</span>
       </div>
     </div>
   );

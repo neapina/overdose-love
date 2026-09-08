@@ -4,7 +4,7 @@ import { Notepad } from './Notepad';
 import { ImageView, Photos } from './Photos';
 import { Music } from './Music';
 import { Camera } from './Camera';
-import { Browser } from './Browser';
+import { Meromero } from './Meromero';
 import { Messenger } from './Messenger';
 import { Paint } from './Paint';
 import { Personalize } from './Personalize';
@@ -23,8 +23,8 @@ export function AppView({ win }: { win: WindowState }) {
       return <Music win={win} />;
     case 'camera':
       return <Camera />;
-    case 'browser':
-      return <Browser win={win} />;
+    case 'meromero':
+      return <Meromero win={win} />;
     case 'messenger':
       return <Messenger win={win} />;
     case 'paint':

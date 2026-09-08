@@ -6,7 +6,7 @@ export function Taskbar() {
   const s = useGameState();
   const top = topWindowId();
   const unread = s.unread.ren + s.unread.mayu;
-  const showRen = s.messengerInstalled || s.flags.ren_commented;
+  const showRen = !!s.flags.ren_known && !s.flags.ren_gone;
 
   return (
     <div className="taskbar">
@@ -24,16 +24,13 @@ export function Taskbar() {
         <div className="task pinned clickable" role="button" title="Проводник" onClick={() => openWindow('explorer')}>
           <img src="/assets/icons/folder-documents.png" alt="" />
         </div>
-        <div className="task pinned clickable" role="button" title="Браузер" onClick={() => openWindow('browser')}>
-          <img src="/assets/icons/browser.png" alt="" />
-          {!s.messengerInstalled && unread > 0 && <span className="badge">{unread}</span>}
+        <div className="task pinned clickable" role="button" title="meromero" onClick={() => openWindow('meromero')}>
+          <img src="/assets/icons/meromero.png" alt="" />
         </div>
-        {s.messengerInstalled && (
-          <div className="task pinned clickable" role="button" title="M Messenger" onClick={() => openWindow('messenger')}>
-            <img src="/assets/icons/meromero.png" alt="" />
-            {unread > 0 && <span className="badge">{unread}</span>}
-          </div>
-        )}
+        <div className="task pinned clickable" role="button" title="M Messenger" onClick={() => openWindow('messenger')}>
+          <img src="/assets/mm/bubble-pink.png" alt="" />
+          {unread > 0 && <span className="badge">{unread}</span>}
+        </div>
         {s.windows.map((w) => (
           <div
             key={w.id}
