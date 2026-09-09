@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { setState, stage, think, useGameState, type WindowState } from '../state/store';
 import { REN_SONG, SONGS } from '../story/fs';
 import { playMusic, playSound, setMusicMuted, stopMusic } from '../os/sounds';
+import { openOn, TOUCH } from '../os/viewport';
 
 const byName = (name: string | undefined, list: typeof SONGS) => (name ? list.findIndex((t) => t.title === name.replace(/\.mp3$/, '') || t.title === name) : -1);
 
@@ -81,12 +82,12 @@ export function Music({ win }: { win: WindowState }) {
             key={t.title}
             className={`clickable ${i === idx ? 'active' : ''}`}
             role="button"
-            title="двойной клик — играть"
-            onDoubleClick={() => {
+            title={TOUCH ? 'нажми — играть' : 'двойной клик — играть'}
+            {...openOn(() => {
               playSound('click');
               setIdx(i);
               setPlaying(true);
-            }}
+            })}
           >
             <span>
               {i === idx && playing ? '♪ ' : `${i + 1}. `}

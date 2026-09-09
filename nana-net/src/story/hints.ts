@@ -1,6 +1,7 @@
 import { CONFIG } from '../config';
 import { stage, type GameState, type ToastAction } from '../state/store';
 import { homeworkFor } from './school';
+import { TOUCH } from '../os/viewport';
 
 export interface Hint {
   flag: string;
@@ -31,7 +32,7 @@ export function dayHints(s: GameState, remaining: number): Hint | null {
       ? {
           flag: 'hint_d1_start',
           text: 'дома. маю на перемене сказала: «зарегайся на meromero сегодня, я тебя найду». и ещё домашка. ладно.',
-          toast: { title: 'Рабочий стол', text: 'Двойной клик по значку открывает программу. Пуск — внизу слева.', icon: '/assets/icons/computer.png' },
+          toast: { title: 'Рабочий стол', text: TOUCH ? 'Нажми на значок — откроется программа. Пуск — внизу слева.' : 'Двойной клик по значку открывает программу. Пуск — внизу слева.', icon: '/assets/icons/computer.png' },
         }
       : null,
     d >= 2 && c >= CONFIG.dayStartMinutes + 1

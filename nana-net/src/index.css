@@ -2556,3 +2556,130 @@ img {
 .music-bar.clickable {
   cursor: pointer;
 }
+
+/* ───────── phones / touch ───────── */
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.win-title,
+.win-resize,
+.icon,
+.taskbar {
+  touch-action: none;
+}
+
+.screen.touch,
+.screen.touch a,
+.screen.touch button,
+.screen.touch .clickable,
+.screen.touch [role='button'],
+.screen.touch input,
+.screen.touch textarea {
+  cursor: auto;
+}
+
+.screen.touch .win-btn {
+  width: 34px;
+  height: 24px;
+  font-size: 13px;
+}
+
+.screen.touch .win-title {
+  height: 34px;
+}
+
+.screen.touch .win-resize {
+  width: 28px;
+  height: 28px;
+}
+
+.screen.touch .choice,
+.screen.touch .chip,
+.screen.touch .btn {
+  min-height: 34px;
+}
+
+.screen.touch .chip {
+  padding: 6px 12px;
+}
+
+.screen.touch .choice {
+  padding: 9px 12px;
+}
+
+.screen.touch .toast {
+  min-height: 52px;
+}
+
+.screen.touch .toast-x {
+  font-size: 18px;
+  padding: 6px 8px;
+}
+
+.screen.touch .win-body,
+.screen.touch .mm-feed,
+.screen.touch .mm-msgs,
+.screen.touch .explorer-main,
+.screen.touch .hw-body {
+  -webkit-overflow-scrolling: touch;
+}
+
+.fs-btn {
+  position: fixed;
+  top: 6px;
+  right: 6px;
+  z-index: 200000;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.rotate-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 300000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background: #0b0f16;
+  color: #e9e6f0;
+  font-family: var(--font);
+}
+
+.rotate-hint b {
+  font-size: 20px;
+}
+
+.rotate-hint span {
+  font-size: 13px;
+  color: #98a0b0;
+  max-width: 260px;
+}
+
+.rotate-phone {
+  font-size: 56px;
+  animation: rotate-phone 1.8s ease-in-out infinite;
+}
+
+@keyframes rotate-phone {
+  0%,
+  25% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(90deg);
+  }
+}

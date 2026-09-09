@@ -4,6 +4,7 @@ import { setWindowTitle } from '../state/windows';
 import { buildFs, resolvePath, type FsNode } from '../story/fs';
 import { renderPhoto } from '../story/photos';
 import { openNode } from '../os/open';
+import { openOn } from '../os/viewport';
 
 export function Explorer({ win }: { win: WindowState }) {
   const s = useGameState();
@@ -61,7 +62,7 @@ export function Explorer({ win }: { win: WindowState }) {
         </div>
         <div className={`explorer-main ${items.length ? '' : 'empty'}`}>
           {items.map((n, i) => (
-            <div key={`${n.name}_${i}`} className="fitem clickable" role="button" onDoubleClick={() => open(n)}>
+            <div key={`${n.name}_${i}`} className="fitem clickable" role="button" {...openOn(() => open(n))}>
               {n.kind === 'image' ? <img className="thumb" src={renderPhoto(n.photo!, 112, 84)} alt="" /> : <img src={n.icon} alt="" />}
               <span>{n.name}</span>
             </div>

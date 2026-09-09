@@ -1,6 +1,7 @@
 import { getState, setState, stage, think, type AppId, type WindowState } from './store';
 import { playSound } from '../os/sounds';
 import { appOpenedThought } from '../story/voice';
+import { viewport } from '../os/viewport';
 
 export const APP_META: Record<AppId, { title: string; icon: string; w: number; h: number; single?: boolean }> = {
   explorer: { title: 'Проводник', icon: '/assets/icons/folder-documents.png', w: 720, h: 460 },
@@ -31,8 +32,9 @@ export function openWindow(app: AppId, props?: Record<string, unknown>, titleOve
   }
   const id = s.nextWindowId;
   const z = Math.max(0, ...s.windows.map((w) => w.z)) + 1;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight - 40;
+  const vp = viewport();
+  const vw = vp.w;
+  const vh = vp.h - 40;
   const w = Math.min(meta.w, vw - 40);
   const h = Math.min(meta.h, vh - 40);
   const offset = (s.windows.length % 6) * 24;
@@ -46,7 +48,7 @@ export function openWindow(app: AppId, props?: Record<string, unknown>, titleOve
     h,
     z,
     minimized: false,
-    maximized: false,
+    maximized: vp.scale !== 1,
     props,
   };
   setState({ windows: [...s.windows, win], nextWindowId: id + 1, startOpen: false });

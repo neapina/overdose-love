@@ -9,6 +9,7 @@ import { StartMenu } from './StartMenu';
 import { Thought, Toasts } from './Toasts';
 import { AppView } from '../apps/AppView';
 import { topWindowId } from '../state/windows';
+import { TOUCH } from './viewport';
 
 export function Desktop() {
   const s = useGameState();
@@ -40,8 +41,13 @@ export function Desktop() {
             key={n.name}
             className={`icon clickable ${selected === n.name ? 'selected' : ''}`}
             role="button"
-            onClick={() => setSelected(n.name)}
-            onDoubleClick={() => openNode(n, ['Компьютер', 'Рабочий стол'])}
+            onClick={() => {
+              setSelected(n.name);
+              if (TOUCH) openNode(n, ['Компьютер', 'Рабочий стол']);
+            }}
+            onDoubleClick={() => {
+              if (!TOUCH) openNode(n, ['Компьютер', 'Рабочий стол']);
+            }}
           >
             <img src={n.icon} alt="" />
             <span>{n.name}</span>

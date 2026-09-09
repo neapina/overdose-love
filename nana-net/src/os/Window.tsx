@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from 'react';
 import type { WindowState } from '../state/store';
 import { APP_META, closeWindow, focusWindow, minimizeWindow, moveWindow, resizeWindow, toggleMaximize } from '../state/windows';
+import { toLogical, viewport } from './viewport';
 
 interface Props {
   win: WindowState;
@@ -17,13 +18,14 @@ export function Window({ win, active, children }: Props) {
     if ((e.target as HTMLElement).closest('.win-btn')) return;
     if (win.maximized) return;
     focusWindow(win.id);
-    drag.current = { dx: e.clientX - win.x, dy: e.clientY - win.y };
+    drag.current = { dx: toLogical(e.clientX) - win.x, dy: toLogical(e.clientY) - win.y };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
   function onTitleMove(e: React.PointerEvent) {
     if (!drag.current) return;
-    const x = Math.max(-win.w + 80, Math.min(window.innerWidth - 60, e.clientX - drag.current.dx));
-    const y = Math.max(0, Math.min(window.innerHeight - 70, e.clientY - drag.current.dy));
+    const vp = viewport();
+    const x = Math.max(-win.w + 80, Math.min(vp.w - 60, toLogical(e.clientX) - drag.current.dx));
+    const y = Math.max(0, Math.min(vp.h - 70, toLogical(e.clientY) - drag.current.dy));
     moveWindow(win.id, x, y);
   }
   function onTitleUp() {
@@ -33,16 +35,16 @@ export function Window({ win, active, children }: Props) {
   function onResizeDown(e: React.PointerEvent) {
     e.stopPropagation();
     focusWindow(win.id);
-    rs.current = { x: e.clientX, y: e.clientY, w: win.w, h: win.h };
+    rs.current = { x: toLogical(e.clientX), y: toLogical(e.clientY), w: win.w, h: win.h };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
   function onResizeMove(e: React.PointerEvent) {
     if (!rs.current) return;
-    resizeWindow(win.id, rs.current.w + (e.clientX - rs.current.x), rs.current.h + (e.clientY - rs.current.y));
+    resizeWindow(win.id, rs.current.w + (toLogical(e.clientX) - rs.current.x), rs.current.h + (toLogical(e.clientY) - rs.current.y));
   }
 
   const style = win.maximized
-    ? { left: 0, top: 0, width: '100vw', height: 'calc(100vh - var(--taskbar-h))', zIndex: win.z }
+    ? { left: 0, top: 0, width: '100%', height: 'calc(100% - var(--taskbar-h))', zIndex: win.z }
     : { left: win.x, top: win.y, width: win.w, height: win.h, zIndex: win.z };
 
   return (

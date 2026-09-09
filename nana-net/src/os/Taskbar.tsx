@@ -3,6 +3,7 @@ import { APP_META, focusWindow, minimizeWindow, openWindow, topWindowId } from '
 import { goToSleep, remainingToday } from '../story/engine';
 import { homeworkLeft } from '../story/school';
 import { playSound } from './sounds';
+import { canFullscreen, requestFullscreen, TOUCH, useFullscreen } from './viewport';
 
 export function Taskbar() {
   const s = useGameState();
@@ -13,6 +14,7 @@ export function Taskbar() {
   const late = s.clock >= 23 * 60;
   const dayDone = late && remainingToday(s).length === 0 && !s.activeConversation;
   const st = stage(s);
+  const fullscreen = useFullscreen();
 
   return (
     <div className="taskbar">
@@ -72,6 +74,11 @@ export function Taskbar() {
             }}
           >
             <img src="/assets/mm/moon.png" alt="" />
+          </span>
+        )}
+        {TOUCH && !fullscreen && canFullscreen() && (
+          <span className="sysicon clickable" role="button" title="На весь экран" onClick={requestFullscreen}>
+            ⛶
           </span>
         )}
         <span className="sysicon clickable" role="button" title={s.muted ? 'Звук выключен' : 'Звук'} onClick={() => setState((st) => ({ muted: !st.muted }))}>
