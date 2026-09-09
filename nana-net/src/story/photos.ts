@@ -7,7 +7,7 @@ export interface PhotoDef {
   title: string;
   scene: Scene;
   seed: number;
-  folder: 'photos' | 'mayu' | 'ren' | 'webcam';
+  folder: 'photos' | 'mayu' | 'ren';
   when?: (s: GameState) => boolean;
   caption?: string;
 }
@@ -17,6 +17,7 @@ export const PHOTOS: Record<string, PhotoDef> = {
   room_1: { file: 'DSC_0044.jpg', title: 'комната', scene: 'room', seed: 5, folder: 'photos' },
   school_1: { file: 'DSC_0052.jpg', title: 'школа, окно', scene: 'school', seed: 8, folder: 'photos' },
   city_1: { file: 'IMG_0107.jpg', title: 'город вечером', scene: 'city', seed: 11, folder: 'photos' },
+  nana_old: { file: 'WIN_2010_017.jpg', title: 'я (старое, с вебки)', scene: 'webcam', seed: 104, folder: 'photos' },
   mayu_1: { file: 'mayu_002.jpg', title: 'маю ✌', scene: 'mayu_selfie', seed: 21, folder: 'mayu' },
   mayu_2: { file: 'mayu_015.jpg', title: 'маю и автомат с напитками', scene: 'mayu_selfie', seed: 22, folder: 'mayu' },
   cafe_mayu: { file: 'P1010233.jpg', title: 'кафе. крем на носу', scene: 'cafe', seed: 31, folder: 'mayu', when: (s) => !!s.flags.photo_cafe },
@@ -28,15 +29,11 @@ export const PHOTOS: Record<string, PhotoDef> = {
 };
 
 export function availablePhotos(s: GameState): string[] {
-  const list = Object.keys(PHOTOS).filter((k) => !PHOTOS[k].when || PHOTOS[k].when!(s));
-  for (let i = 1; i <= s.photosTaken; i++) list.push(`webcam_${i}`);
-  return list;
+  return Object.keys(PHOTOS).filter((k) => !PHOTOS[k].when || PHOTOS[k].when!(s));
 }
 
 export function photoDef(id: string): PhotoDef {
-  if (PHOTOS[id]) return PHOTOS[id];
-  const n = parseInt(id.replace('webcam_', ''), 10) || 1;
-  return { file: `WIN_2011_${String(n).padStart(3, '0')}.jpg`, title: 'вебка', scene: 'webcam', seed: 100 + n, folder: 'webcam' };
+  return PHOTOS[id] ?? PHOTOS.room_1;
 }
 
 // ───────────────────────── procedural renderer ─────────────────────────

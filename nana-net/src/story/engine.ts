@@ -1,24 +1,30 @@
 import { CONFIG } from '../config';
-import { getState, isNight, setState, toast, type ChatMessage, type Contact } from '../state/store';
+import { getState, isAfternoon, isNight, setState, stage, think, toast, type ChatMessage, type Contact, type GameState } from '../state/store';
 import { playSound } from '../os/sounds';
 import { CONVERSATIONS } from './content';
+import { dayHints } from './hints';
+import { idleThought } from './voice';
 import type { ChoiceOption, Conversation, Step } from './types';
 
 let queue: Step[] = [];
 let currentConv: Conversation | null = null;
+let lastInteraction = Date.now();
+let lastIdleThought = Date.now();
+
+export function noteInteraction() {
+  lastInteraction = Date.now();
+}
 let timer: ReturnType<typeof setTimeout> | null = null;
 let tickHandle: ReturnType<typeof setInterval> | null = null;
 
 export const CONTACT_NAME: Record<Contact, string> = { ren: 'REN_17', mayu: 'mayu☆' };
 
+export const chatTarget = (contact: Contact) => ({ app: 'meromero' as const, props: { page: 'messages', contact } });
+export const feedTarget = { app: 'meromero' as const, props: { page: 'feed' } };
+
 export function chatWindowOpenFor(contact: Contact) {
   const s = getState();
-  return s.windows.some((w) => {
-    if (w.minimized) return false;
-    if (w.app === 'messenger') return w.props?.contact === contact;
-    if (w.app === 'meromero') return w.props?.page === 'messages' && w.props?.contact === contact;
-    return false;
-  });
+  return s.windows.some((w) => !w.minimized && w.app === 'meromero' && w.props?.page === 'messages' && w.props?.contact === contact);
 }
 
 export function activeContact(): Contact | null {
@@ -38,7 +44,7 @@ export function pushMessage(m: Omit<ChatMessage, 'id' | 'day' | 'time' | 'contac
   if (m.from === 'ren' || m.from === 'mayu') {
     playSound('message');
     if (!chatWindowOpenFor(m.from)) {
-      toast(m.channel === 'messenger' ? 'M Messenger' : 'meromero', `${CONTACT_NAME[m.from]}: ${m.text}`, '/assets/mm/notif-chat.png');
+      toast('meromero · сообщения', `${CONTACT_NAME[m.from]}: ${m.text}`, '/assets/mm/notif-chat.png', chatTarget(m.from));
     }
   }
 }
@@ -89,11 +95,11 @@ function runNext() {
         setTyping(from, true);
         schedule(step.delay ?? typingDelay(step.text), () => {
           setTyping(from, false);
-          pushMessage({ from, text: step.text, photo: step.photo, channel: conv.channel });
+          pushMessage({ from, text: step.text, photo: step.photo });
           runNext();
         });
       } else {
-        pushMessage({ from: step.from, text: step.text, photo: step.photo, channel: conv.channel });
+        pushMessage({ from: step.from, text: step.text, photo: step.photo });
         schedule(step.from === 'system' ? 1200 : 600, runNext);
       }
       break;
@@ -102,7 +108,7 @@ function runNext() {
       lastChoice = step;
       setState({ pendingChoice: { conversation: conv.id, step: 0 } });
       if (!chatWindowOpenFor(conv.contact)) {
-        toast(conv.channel === 'messenger' ? 'M Messenger' : 'meromero', `${CONTACT_NAME[conv.contact]} ждёт ответа…`, '/assets/mm/notif-chat.png');
+        toast('meromero · сообщения', `${CONTACT_NAME[conv.contact]} ждёт ответа…`, '/assets/mm/notif-chat.png', chatTarget(conv.contact));
       }
       // wait for chooseOption()
       break;
@@ -124,6 +130,10 @@ function runNext() {
       toast(step.title, step.text, step.icon);
       playSound('notify');
       schedule(800, runNext);
+      break;
+    case 'think':
+      think(step.text);
+      schedule(1500, runNext);
       break;
     case 'comment': {
       commentOnLatest(step.author, step.text);
@@ -166,7 +176,7 @@ export function setContactStatus(contact: Contact, online: boolean) {
       setState({ renOnline: online, renTyping: false });
       if (s.flags.ren_known) {
         playSound(online ? 'online' : 'offline');
-        if (online) toast('M Messenger', 'REN_17 — в сети', '/assets/mm/dot-green.png');
+        if (online) toast('meromero', 'REN_17 — в сети', '/assets/mm/dot-green.png', chatTarget('ren'));
       }
     }
   } else if (s.mayuOnline !== online) {
@@ -200,7 +210,7 @@ function commentOnLatest(author: string, text: string) {
   if (!p) return;
   addComment(p.id, author, text);
   playSound('notify');
-  toast('meromero', `${author} прокомментировал(а) твою запись`, '/assets/mm/notif-chat.png');
+  toast('meromero', `${author} прокомментировал(а) твою запись`, '/assets/mm/notif-chat.png', feedTarget);
 }
 
 function likeLatest(author: string) {
@@ -210,7 +220,7 @@ function likeLatest(author: string) {
     posts: st.posts.map((x) => (x.id === p.id ? { ...x, likes: x.likes + 1, likedBy: [...(x.likedBy ?? []), author] } : x)),
   }));
   playSound('notify');
-  toast('meromero', `${author} нравится твоя запись`, '/assets/mm/heart-small.png');
+  toast('meromero', `${author} нравится твоя запись`, '/assets/mm/heart-small.png', feedTarget);
 }
 
 let lastChoice: Extract<Step, { type: 'choice' }> | null = null;
@@ -228,20 +238,19 @@ export function chooseOption(index: number) {
   if (!opt) return;
   setState({ pendingChoice: null });
   applyEffects(opt);
-  const photo = opt.photo === 'webcam_last' ? `webcam_${Math.max(1, s.photosTaken)}` : opt.photo;
-  pushMessage({ from: 'nana', text: opt.text.replace(/^\[[^\]]*\]\s*/, '') || opt.text, photo, channel: currentConv.channel });
+  pushMessage({ from: 'nana', text: opt.text.replace(/^\[[^\]]*\]\s*/, '') || opt.text, photo: opt.photo });
   if (opt.then) queue.unshift(...opt.then);
   lastChoice = null;
   schedule(500, runNext);
 }
 
 /** Nana says a canned line outside of a story conversation; contact replies with `then`. */
-export function sayIdle(contact: Contact, opt: ChoiceOption, channel: 'meromero' | 'messenger') {
+export function sayIdle(contact: Contact, opt: ChoiceOption) {
   if (currentConv) return;
   applyEffects(opt);
-  pushMessage({ from: 'nana', contact, text: opt.text, channel });
+  pushMessage({ from: 'nana', contact, text: opt.text });
   if (!opt.then?.length) return;
-  currentConv = { id: `idle_${contact}_${Date.now()}`, contact, channel, steps: [] };
+  currentConv = { id: `idle_${contact}_${Date.now()}`, contact, steps: [] };
   queue = [...opt.then];
   setState({ activeConversation: currentConv.id });
   schedule(600, runNext);
@@ -256,18 +265,35 @@ function startConversation(conv: Conversation) {
 
 // ---- clock & scheduler
 
+/** conversations that may still start today */
+export function remainingToday(s: GameState) {
+  return CONVERSATIONS.filter((c) => c.day === s.day && !s.seenConversations.includes(c.id) && (c.at === undefined || c.at > s.clock || !c.when || c.when(s)));
+}
+
+function mayuShouldBeOnline(s: GameState) {
+  if (isAfternoon(s)) return false;
+  const off = 24 * 60 + 30 + stage(s) * 20;
+  return s.clock < off || (!!s.activeConversation && currentConv?.contact === 'mayu');
+}
+
 function tick() {
   const s = getState();
   if (s.phase !== 'desktop') return;
-  const clock = s.clock + CONFIG.clockSpeed;
+  const clock = s.clock + (isAfternoon(s) ? CONFIG.afternoonClockSpeed : CONFIG.clockSpeed);
   setState({ clock });
 
-  if (clock >= CONFIG.forceSleepMinutes && !s.activeConversation && !s.pendingChoice) {
+  const hardCap = clock >= CONFIG.forceSleepMinutes + 80;
+  if (clock >= CONFIG.forceSleepMinutes && (hardCap || (!s.activeConversation && !s.pendingChoice))) {
     forceSleep();
     return;
   }
 
-  if (!currentConv && !s.pendingChoice) {
+  if (!currentConv) {
+    const mayuOn = mayuShouldBeOnline({ ...s, clock });
+    if (mayuOn !== s.mayuOnline) setContactStatus('mayu', mayuOn);
+  }
+
+  if (!currentConv && !s.pendingChoice && s.flags.mm_registered) {
     const candidate = CONVERSATIONS.find(
       (c) =>
         (c.day === undefined || c.day === s.day) &&
@@ -275,12 +301,32 @@ function tick() {
         !s.seenConversations.includes(c.id) &&
         (!c.when || c.when(s)),
     );
-    if (candidate) startConversation(candidate);
+    if (candidate) {
+      startConversation(candidate);
+      return;
+    }
+  }
+
+  const now = Date.now();
+  if (now - lastInteraction > 75_000 && now - lastIdleThought > 110_000 && !s.thought && !s.pendingChoice) {
+    lastIdleThought = now;
+    think(idleThought({ ...s, clock }), 7000);
+  }
+
+  if (!s.activeConversation && !s.pendingChoice && !s.thought) {
+    const hint = dayHints({ ...s, clock }, remainingToday({ ...s, clock }).length);
+    if (hint && !s.flags[hint.flag]) {
+      setState((st) => ({ flags: { ...st.flags, [hint.flag]: true } }));
+      think(hint.text, 8000);
+      if (hint.toast) toast(hint.toast.title, hint.toast.text, hint.toast.icon, hint.toast.action);
+    }
   }
 }
 
 export function startEngine() {
   if (tickHandle) return;
+  lastInteraction = Date.now();
+  lastIdleThought = Date.now();
   tickHandle = setInterval(tick, 1000);
 }
 
@@ -313,10 +359,14 @@ export function goToSleep(forced = false) {
   // Day-bound conversations not seen today are dropped
   const skipped = CONVERSATIONS.filter((c) => c.day === s.day && !s.seenConversations.includes(c.id)).map((c) => c.id);
   playSound(forced ? 'logoff' : 'shutdown');
+  const late = s.clock >= 26 * 60;
   setState({
     phase: 'sleep',
     windows: [],
     startOpen: false,
+    thought: null,
+    toasts: [],
+    sleepPrompt: false,
     pendingChoice: null,
     activeConversation: null,
     renTyping: false,
@@ -324,7 +374,7 @@ export function goToSleep(forced = false) {
     seenConversations: [...s.seenConversations, ...skipped],
     sleepCount: s.sleepCount + 1,
     ren: forced ? s.ren + 1 : s.ren,
-    flags: { ...s.flags, forced_sleep: forced },
+    flags: { ...s.flags, forced_sleep: forced, [`late_d${s.day}`]: late || forced, [`slept_d${s.day}`]: true },
   });
   setTimeout(() => {
     const st = getState();
@@ -336,12 +386,12 @@ export function goToSleep(forced = false) {
     setState({
       day: nextDay,
       clock: CONFIG.dayStartMinutes,
-      phase: 'desktop',
+      phase: 'interlude',
+      homeworkDone: [],
       renOnline: false,
-      mayuOnline: true,
+      mayuOnline: false,
       wallpaper: st.wallpaper,
     });
-    playSound('logon');
   }, 4500);
 }
 

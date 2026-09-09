@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { formatClock, setState, useGameState, type Contact, type Post, type WindowState } from '../state/store';
+import { formatClock, setState, think, toast, useGameState, type Contact, type GameState, type Post, type WindowState } from '../state/store';
 import { setWindowTitle } from '../state/windows';
 import { addComment, addPost } from '../story/engine';
 import { avatar } from '../story/avatars';
@@ -13,9 +13,11 @@ import { commentOptions, postOptions, replyOptions, statusOptions, type CommentO
 type Page = 'feed' | 'profile' | 'messages' | 'user';
 
 const AVATARS = ['nana', 'nana2', 'yuki', 'kaori'];
+const NICKS = ['nana', 'nana_k', 'nanaaa', 'n_a_n_a', 'nana.exe'];
 
-const NAMES: Record<string, string> = { nana: 'nana', mayu: 'mayu☆', ren: 'REN_17' };
-const displayName = (author: string) => NAMES[author] ?? author;
+const NAMES: Record<string, string> = { mayu: 'mayu☆', ren: 'REN_17' };
+const nick = (s: GameState) => s.profile.nick || 'nana';
+const displayName = (author: string, s: GameState) => (author === 'nana' ? nick(s) : NAMES[author] ?? author);
 const authorAvatar = (author: string, nanaAvatar: number) =>
   author === 'nana' ? AVATARS[nanaAvatar] ?? 'nana' : author === 'mayu' ? 'mayu' : author === 'ren' ? 'ren' : author === 'yuki_02' ? 'yuki' : author === 'kaori.k' ? 'kaori' : 'unknown';
 const userIdFor = (name: string) => (name === 'REN_17' ? 'ren' : name === 'mayu☆' ? 'mayu' : name);
@@ -26,27 +28,32 @@ export function Meromero({ win }: { win: WindowState }) {
   const contact = win.props?.contact as Contact | undefined;
   const user = win.props?.user as string | undefined;
   const unread = s.unread.ren + s.unread.mayu;
+  const registered = !!s.flags.mm_registered && !!s.flags.mm_entered;
 
   useEffect(() => {
+    if (!s.flags.mm_registered) return;
     setState((st) =>
       st.flags.mm_seeded
         ? {}
         : {
             flags: { ...st.flags, mm_seeded: true },
             posts: [
-              { id: 'seed_yuki', author: 'yuki_02', text: 'кто-нибудь знает как убрать музыку с автоплеем со страницы?? помогите', day: st.day, time: st.clock, likes: 10, comments: [], likedBy: [] },
+              { id: 'seed_kaori', author: 'kaori.k', text: 'новые наушники ✧ теперь никто не мешает', day: st.day, time: st.clock - 190, likes: 6, comments: [{ author: 'yuki_02', text: 'какие??' }], likedBy: [] },
+              { id: 'seed_yuki', author: 'yuki_02', text: 'кто-нибудь знает как убрать музыку с автоплеем со страницы?? помогите', day: st.day, time: st.clock - 40, likes: 10, comments: [], likedBy: [] },
               ...st.posts,
             ],
           }
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [s.flags.mm_registered]);
 
   function nav(p: Page, extra: Record<string, unknown> = {}) {
     playSound('click');
     setState((st) => ({ windows: st.windows.map((w) => (w.id === win.id ? { ...w, props: { ...w.props, page: p, contact: undefined, user: undefined, ...extra } } : w)) }));
     setWindowTitle(win.id, p === 'messages' && extra.contact ? `meromero · ${CONTACT_INFO[extra.contact as Contact].name}` : p === 'profile' ? 'meromero · моя страница' : 'meromero');
   }
+
+  if (!registered) return <Register />;
 
   return (
     <div className="mm">
@@ -68,7 +75,7 @@ export function Meromero({ win }: { win: WindowState }) {
           </button>
         </div>
         <div style={{ marginLeft: 'auto', fontSize: 12, color: '#7a4a5e' }}>
-          <i className="dot on" /> nana
+          <i className="dot on" /> {nick(s)}
         </div>
       </div>
       {page === 'feed' && <Feed nav={nav} />}
@@ -85,16 +92,24 @@ function Sidebar({ nav }: { nav: Nav }) {
   const s = useGameState();
   const gone = !!s.flags.ren_gone;
   const renVisible = !!s.flags.ren_known;
+  const mayuFriend = !!s.flags.mayu_friend;
   return (
     <div className="mm-side">
       <div className="mm-card">
-        <h4>Друзья ({renVisible && !gone ? 2 : 1})</h4>
-        <div className="mm-friend clickable" role="button" onClick={() => nav('user', { user: 'mayu' })}>
-          <img className="av" src={avatar('mayu', 28)} alt="" />
-          <span>
-            <i className={`dot ${s.mayuOnline ? 'on' : 'off'}`} /> mayu☆
-          </span>
-        </div>
+        <h4>Друзья ({(mayuFriend ? 1 : 0) + (renVisible && !gone ? 1 : 0)})</h4>
+        {!mayuFriend && (
+          <div className="pad" style={{ fontSize: 12, color: '#999' }}>
+            Пока никого. Друзья найдут тебя по нику.
+          </div>
+        )}
+        {mayuFriend && (
+          <div className="mm-friend clickable" role="button" onClick={() => nav('user', { user: 'mayu' })}>
+            <img className="av" src={avatar('mayu', 28)} alt="" />
+            <span>
+              <i className={`dot ${s.mayuOnline ? 'on' : 'off'}`} /> mayu☆
+            </span>
+          </div>
+        )}
         {renVisible && (
           <div className="mm-friend clickable" role="button" onClick={() => nav('user', { user: 'ren' })} style={gone ? { opacity: 0.5 } : undefined}>
             <img className="av" src={avatar(gone ? 'unknown' : 'ren', 28)} alt="" />
@@ -107,7 +122,7 @@ function Sidebar({ nav }: { nav: Nav }) {
       <div className="mm-card">
         <h4>Сейчас на сайте</h4>
         <div className="pad" style={{ fontSize: 12 }}>
-          {[s.mayuOnline && 'mayu☆', s.renOnline && renVisible && !gone && 'REN_17', 'yuki_02', s.day % 2 ? 'kaori.k' : null].filter(Boolean).join(' · ')}
+          {[nick(s), s.mayuOnline && 'mayu☆', s.renOnline && renVisible && !gone && 'REN_17', 'yuki_02', s.day % 2 ? 'kaori.k' : null].filter(Boolean).join(' · ')}
         </div>
       </div>
       <div className="mm-card">
@@ -223,7 +238,7 @@ function PostView({ post, nav }: { post: Post; nav: Nav }) {
     }));
     setCommenting(false);
     if (o.reply) {
-      const author = post.author === 'nana' ? post.comments.at(-1)?.author ?? 'mayu☆' : displayName(post.author);
+      const author = post.author === 'nana' ? post.comments.at(-1)?.author ?? 'mayu☆' : displayName(post.author, s);
       const reply = o.reply;
       setTimeout(() => {
         addComment(post.id, author, reply);
@@ -236,7 +251,7 @@ function PostView({ post, nav }: { post: Post; nav: Nav }) {
     <div className="mm-post">
       <img className="av clickable" src={avatar(authorAvatar(post.author, s.profile.avatar), 40)} alt="" onClick={() => post.author !== 'nana' && nav('user', { user: post.author })} />
       <div style={{ minWidth: 0, flex: 1 }}>
-        <span className={`who ${post.author}`}>{displayName(post.author)}</span>
+        <span className={`who ${post.author}`}>{displayName(post.author, s)}</span>
         <span className="when">
           день {post.day} · {formatClock(post.time)}
         </span>
@@ -253,7 +268,7 @@ function PostView({ post, nav }: { post: Post; nav: Nav }) {
         {post.comments.map((c, i) => (
           <div key={i} className={`mm-comment ${c.author === 'nana' ? 'mine' : ''}`}>
             <b className="clickable" onClick={() => c.author !== 'nana' && nav('user', { user: userIdFor(c.author) })}>
-              {c.author}
+              {displayName(c.author, s)}
             </b>
             : {c.text}
           </div>
@@ -292,7 +307,7 @@ function Profile({ nav }: { nav: Nav }) {
             <img className="av" src={avatar(AVATARS[s.profile.avatar] ?? 'nana', 64)} alt="" />
           </div>
           <div className="mm-profile-info">
-            <b>nana</b> <span style={{ color: '#889', fontSize: 11 }}>· 16 · Токио · с нами {s.day} дн.</span>
+            <b>{nick(s)}</b> <span style={{ color: '#889', fontSize: 11 }}>· 16 · Токио · с нами {s.day} дн.</span>
             <div className="mm-status">{s.profile.status || 'статус не задан'}</div>
           </div>
         </div>
@@ -362,7 +377,7 @@ function Profile({ nav }: { nav: Nav }) {
 
 function Messages({ contact, nav }: { contact?: Contact; nav: Nav }) {
   const s = useGameState();
-  const list: Contact[] = ['mayu', ...(s.flags.ren_known ? (['ren'] as Contact[]) : [])];
+  const list: Contact[] = [...(s.flags.mayu_friend ? (['mayu'] as Contact[]) : []), ...(s.flags.ren_known ? (['ren'] as Contact[]) : [])];
   return (
     <div className="mm-body fill">
       <div className="mm-side">
@@ -382,7 +397,13 @@ function Messages({ contact, nav }: { contact?: Contact; nav: Nav }) {
       </div>
       <div className="mm-main">
         <div className="mm-card chatcard">
-          {contact ? <Chat contact={contact} channel="meromero" /> : <div className="pad" style={{ color: '#999', margin: 'auto' }}>Выбери диалог слева</div>}
+          {contact ? (
+            <Chat contact={contact} />
+          ) : (
+            <div className="pad" style={{ color: '#999', margin: 'auto', textAlign: 'center' }}>
+              {list.length ? 'Выбери диалог слева' : 'Диалогов пока нет. Никто ещё не написал.'}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -422,7 +443,7 @@ function UserPage({ user, nav }: { user: string; nav: Nav }) {
             <img className="av" src={avatar(authorAvatar(user, 0), 64)} alt="" />
           </div>
           <div className="mm-profile-info">
-            <b>{displayName(user)}</b>{' '}
+            <b>{displayName(user, s)}</b>{' '}
             <span style={{ color: '#889', fontSize: 11 }}>{isRen ? '· 17 · — · с нами 2 г.' : isMayu ? '· 16 · Токио · с нами 1 г.' : '· 15 · Осака'}</span>
             <div className="mm-status">{status}</div>
             <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
@@ -462,6 +483,171 @@ function UserPage({ user, nav }: { user: string; nav: Nav }) {
             <PostView key={p.id} post={p} nav={nav} />
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ───────────────────────── регистрация ─────────────────────────
+
+type RegStep = 'landing' | 'account' | 'look' | 'done';
+
+function Register() {
+  const s = useGameState();
+  const [step, setStep] = useState<RegStep>('landing');
+  const [nickIdx, setNickIdx] = useState<number | null>(null);
+  const [captcha, setCaptcha] = useState(false);
+  const [av, setAv] = useState(0);
+  const [theme, setTheme] = useState<'sakura' | 'city'>('sakura');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (step === 'account') think('ник. как в «моём» хочется «nana», но он наверняка занят. занят? посмотрим.');
+    if (step === 'look') think('аватар. маю скажет «поставь розовое». подумаю.');
+  }, [step]);
+
+  function go(next: RegStep) {
+    playSound('click');
+    setStep(next);
+  }
+
+  function finish() {
+    setBusy(true);
+    playSound('click');
+    setTimeout(() => {
+      setState((st) => ({
+        profile: { ...st.profile, nick: NICKS[nickIdx ?? 0], avatar: av, theme },
+        flags: { ...st.flags, mm_registered: true },
+      }));
+      playSound('notify');
+      toast('meromero', `Страница ${NICKS[nickIdx ?? 0]} создана. Добро пожаловать!`, '/assets/icons/meromero.png', { app: 'meromero', props: { page: 'profile' } });
+      think(s.clock < 19 * 60 + 30 ? 'всё. я в сети. теперь ждать, пока маю меня найдёт. она обещала вечером.' : 'всё. я в сети. маю обещала найти меня сама.');
+      setBusy(false);
+      setStep('done');
+    }, 1800);
+  }
+
+  return (
+    <div className="mm mm-reg">
+      <div className="mm-top">
+        <div className="mm-logo">
+          <img src="/assets/icons/meromero.png" alt="" />
+          meromero
+        </div>
+        <div style={{ marginLeft: 'auto', fontSize: 11, color: '#889' }}>meromero.net · 2011 · beta</div>
+      </div>
+      <div className="mm-reg-body">
+        {step === 'landing' && (
+          <div className="mm-card mm-reg-card">
+            <div className="mm-reg-hero">
+              <img src="/assets/icons/meromero.png" alt="" />
+              <h2>место, где тихо</h2>
+              <p>страница, друзья, музыка профиля, сообщения. без лишнего.</p>
+            </div>
+            <div className="mm-reg-actions">
+              <button className="btn pink" onClick={() => go('account')}>
+                Создать страницу
+              </button>
+              <button className="btn" disabled title="У Наны ещё нет страницы">
+                Войти
+              </button>
+            </div>
+            <div className="mm-reg-foot">сейчас на сайте: 1 204 · новых сегодня: 37</div>
+          </div>
+        )}
+        {step === 'account' && (
+          <div className="mm-card mm-reg-card">
+            <h4>Шаг 1 из 2 — учётная запись</h4>
+            <div className="pad mm-form">
+              <label>Ник</label>
+              <div className="mm-statuses">
+                {NICKS.map((n, i) => {
+                  const taken = i === 0;
+                  return (
+                    <button key={n} className={`chip ${nickIdx === i ? 'active' : ''} ${taken ? 'muted' : ''}`} onClick={() => !taken && (playSound('click'), setNickIdx(i))} title={taken ? 'занят' : undefined}>
+                      {n}
+                      {taken && <small> · занят</small>}
+                    </button>
+                  );
+                })}
+              </div>
+              <label>E-mail</label>
+              <input className="input" value="nana.k@ymail.jp" readOnly />
+              <label>Пароль</label>
+              <input className="input" type="password" value="sakura" readOnly />
+              <small className="mm-note">тот же, что от компьютера. плохая идея. знаю.</small>
+              <label>Дата рождения</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input className="input" value="14" readOnly style={{ width: 50 }} />
+                <input className="input" value="март" readOnly style={{ width: 90 }} />
+                <input className="input" value="1995" readOnly style={{ width: 70 }} />
+              </div>
+              <label>Проверка</label>
+              <div className="mm-captcha">
+                <span className="mm-captcha-img">m3r0</span>
+                {captcha ? <input className="input" value="m3r0" readOnly style={{ width: 90 }} /> : <button className="btn" onClick={() => (playSound('click'), setCaptcha(true))}>ввести</button>}
+              </div>
+            </div>
+            <div className="mm-reg-actions">
+              <button className="btn" onClick={() => go('landing')}>
+                Назад
+              </button>
+              <button className="btn pink" disabled={nickIdx === null || !captcha} onClick={() => go('look')}>
+                Дальше →
+              </button>
+            </div>
+          </div>
+        )}
+        {step === 'look' && (
+          <div className="mm-card mm-reg-card">
+            <h4>Шаг 2 из 2 — как ты выглядишь</h4>
+            <div className="pad mm-form">
+              <label>Аватар</label>
+              <div className="mm-avatars">
+                {AVATARS.map((a, i) => (
+                  <img key={a} className={`clickable ${av === i ? 'active' : ''}`} src={avatar(a, 44)} alt="" onClick={() => (playSound('click'), setAv(i))} />
+                ))}
+              </div>
+              <label>Тема страницы</label>
+              <div className="mm-themes">
+                {(['sakura', 'city'] as const).map((t) => (
+                  <div key={t} className={`mm-theme clickable ${theme === t ? 'active' : ''}`} role="button" onClick={() => (playSound('click'), setTheme(t))} style={{ backgroundImage: `url(/assets/mm/banner-${t}.png)` }}>
+                    <span>{t === 'sakura' ? 'сакура' : 'город'}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mm-preview">
+                <img className="av" src={avatar(AVATARS[av], 40)} alt="" />
+                <div>
+                  <b>{NICKS[nickIdx ?? 0]}</b>
+                  <div style={{ fontSize: 11, color: '#889' }}>16 · Токио · новичок</div>
+                </div>
+              </div>
+            </div>
+            <div className="mm-reg-actions">
+              <button className="btn" onClick={() => go('account')}>
+                Назад
+              </button>
+              <button className="btn pink" disabled={busy} onClick={finish}>
+                {busy ? 'Создаём страницу…' : 'Создать страницу'}
+              </button>
+            </div>
+          </div>
+        )}
+        {step === 'done' && (
+          <div className="mm-card mm-reg-card">
+            <div className="mm-reg-hero">
+              <img className="av" src={avatar(AVATARS[av], 64)} alt="" style={{ borderRadius: 6 }} />
+              <h2>добро пожаловать, {NICKS[nickIdx ?? 0]}</h2>
+              <p>страница создана. друзей пока нет — но это дело времени.</p>
+            </div>
+            <div className="mm-reg-actions">
+              <button className="btn pink" onClick={() => setState((st) => ({ flags: { ...st.flags, mm_entered: true } }))}>
+                На мою страницу →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

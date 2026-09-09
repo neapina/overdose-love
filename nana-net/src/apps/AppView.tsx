@@ -3,9 +3,8 @@ import { Explorer } from './Explorer';
 import { Notepad } from './Notepad';
 import { ImageView, Photos } from './Photos';
 import { Music } from './Music';
-import { Camera } from './Camera';
 import { Meromero } from './Meromero';
-import { Messenger } from './Messenger';
+import { Homework } from './Homework';
 import { Paint } from './Paint';
 import { Personalize } from './Personalize';
 
@@ -21,12 +20,10 @@ export function AppView({ win }: { win: WindowState }) {
       return <ImageView win={win} />;
     case 'music':
       return <Music win={win} />;
-    case 'camera':
-      return <Camera />;
     case 'meromero':
       return <Meromero win={win} />;
-    case 'messenger':
-      return <Messenger win={win} />;
+    case 'homework':
+      return <Homework />;
     case 'paint':
       return <Paint />;
     case 'personalize':

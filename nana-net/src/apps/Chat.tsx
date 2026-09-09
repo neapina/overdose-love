@@ -8,7 +8,7 @@ import { avatar } from '../story/avatars';
 import { playSound } from '../os/sounds';
 import { CONTACT_INFO } from './contacts';
 
-export function Chat({ contact, channel }: { contact: Contact; channel: 'meromero' | 'messenger' }) {
+export function Chat({ contact }: { contact: Contact }) {
   const s = useGameState();
   const logRef = useRef<HTMLDivElement>(null);
   const info = CONTACT_INFO[contact];
@@ -38,7 +38,7 @@ export function Chat({ contact, channel }: { contact: Contact; channel: 'meromer
           <div className="nm">{gone ? 'пользователь не найден' : info.name}</div>
           <div className="st">
             <i className={`dot ${!gone && online ? 'on' : 'off'}`} /> {gone ? 'USER NOT FOUND' : online ? 'в сети' : 'не в сети'}
-            {channel === 'meromero' ? ' · сообщения meromero' : ' · M Messenger'}
+            {' · сообщения meromero'}
           </div>
         </div>
       </div>
@@ -72,7 +72,7 @@ export function Chat({ contact, channel }: { contact: Contact; channel: 'meromer
               onClick={() => {
                 playSound('click');
                 setState((st) => ({ flags: { ...st.flags, [`idle_${contact}_${o.key}_d${st.day}`]: true } }));
-                sayIdle(contact, o, channel);
+                sayIdle(contact, o);
               }}
             >
               {o.text}

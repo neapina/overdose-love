@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { isNight, setState, toast, useGameState } from '../state/store';
+import { isNight, setState, useGameState } from '../state/store';
 import { buildFs } from '../story/fs';
-import { startEngine, stopEngine } from '../story/engine';
+import { noteInteraction, startEngine, stopEngine } from '../story/engine';
 import { openNode } from './open';
 import { Window } from './Window';
 import { Taskbar } from './Taskbar';
 import { StartMenu } from './StartMenu';
-import { Toasts } from './Toasts';
+import { Thought, Toasts } from './Toasts';
 import { AppView } from '../apps/AppView';
 import { topWindowId } from '../state/windows';
-import { playSound } from './sounds';
-
-let introShown = false;
 
 export function Desktop() {
   const s = useGameState();
@@ -25,20 +22,11 @@ export function Desktop() {
     return () => stopEngine();
   }, []);
 
-  useEffect(() => {
-    if (s.day === 1 && s.clock < 19 * 60 + 45 && !s.flags.intro_toast && !introShown) {
-      introShown = true;
-      setState((st) => ({ flags: { ...st.flags, intro_toast: true } }));
-      setTimeout(() => {
-        toast('meromero.net', 'Регистрация завершена. Добро пожаловать, nana!', '/assets/icons/meromero.png');
-        playSound('notify');
-      }, 1800);
-    }
-  }, [s.day, s.clock, s.flags.intro_toast]);
-
   return (
     <div
       className={`desktop wp-${s.wallpaper} ${isNight(s) ? 'night' : ''}`}
+      onPointerDownCapture={noteInteraction}
+      onKeyDownCapture={noteInteraction}
       onPointerDown={(e) => {
         if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('icons')) {
           setSelected(null);
@@ -69,6 +57,7 @@ export function Desktop() {
 
       <StartMenu />
       <Toasts />
+      <Thought />
       <Taskbar />
     </div>
   );

@@ -19,18 +19,28 @@ const img = (photo: string): FsNode => ({ name: photoDef(photo).file, kind: 'ima
 const audio = (name: string): FsNode => ({ name, kind: 'audio', icon: '/assets/icons/media-player.png' });
 const app = (name: string, a: AppId, icon: string, props?: Record<string, unknown>): FsNode => ({ name, kind: 'app', app: a, icon, props });
 
-export const SONGS = [
-  { title: 'yoru no machi', artist: 'shiroi heya', len: 214 },
-  { title: 'after the rain (demo)', artist: 'unknown', len: 187 },
-  { title: 'kaeri michi', artist: 'tsukiakari', len: 243 },
-  { title: 'sleepless', artist: 'aoi', len: 201 },
+export interface Song {
+  title: string;
+  artist: string;
+  len: number;
+  file: string;
+}
+
+export const SONGS: Song[] = [
+  { title: 'yoru no machi', artist: 'shiroi heya', len: 96, file: '/assets/music/01_yoru_no_machi.mp3' },
+  { title: 'after the rain (demo)', artist: 'unknown', len: 88, file: '/assets/music/02_after_the_rain.mp3' },
+  { title: 'kaeri michi', artist: 'tsukiakari', len: 92, file: '/assets/music/03_kaeri_michi.mp3' },
+  { title: 'sleepless', artist: 'aoi', len: 100, file: '/assets/music/04_sleepless.mp3' },
 ];
 
-export const REN_SONG = { title: 'track07.mp3', artist: 'ren', len: 256 };
+export const REN_SONG: Song = { title: 'track07.mp3', artist: 'ren', len: 104, file: '/assets/music/track07.mp3' };
 
 function notesFor(s: GameState): FsNode[] {
   const st = stage(s);
-  const list: FsNode[] = [txt('список.txt', 'купить молоко\nшампунь\nбатарейки\nнаписать маю\nсделать задание по английскому', 'вчера')];
+  const list: FsNode[] = [
+    txt('список.txt', 'купить молоко\nшампунь\nбатарейки\nнаписать маю\nсделать задание по английскому', 'вчера'),
+    txt('пароли.txt', 'комп: sakura (любимый цветок, ну)\nпочта: тот же\nmeromero: тот же…\n\nмаю говорит так нельзя. маю права.', 'сентябрь'),
+  ];
   if (st >= 1 && s.flags.ren_known) {
     list.push(txt('untitled.txt', 'он написал в 22:30\nя ответила сразу\n\nэто нормально?', '23:14'));
   }
@@ -49,20 +59,25 @@ export function buildFs(s: GameState): FsNode {
   const nanaPhotos = photos.filter((p) => photoDef(p).folder === 'photos');
   const mayuPhotos = photos.filter((p) => photoDef(p).folder === 'mayu');
   const renPhotos = photos.filter((p) => photoDef(p).folder === 'ren');
-  const webcam = photos.filter((p) => photoDef(p).folder === 'webcam');
 
   const mayuFolder = folder('mayu', [...mayuPhotos.map(img), txt('планы.txt', 'сб — кафе у станции\nвс — море?? (маю настаивает)\nкупить плёнку для её мыльницы')], '/assets/icons/folder-star.png');
+
+  const school: FsNode[] = [txt('расписание.txt', 'пн — англ, матем, история, физ-ра\nвт — лит-ра, биология, англ\nср — матем, история, музыка\nчт — англ, лит-ра, физика\nпт — контрольные (((', 'сентябрь')];
+  if (s.flags.hw_d1_eng || s.day >= 2) school.push(txt('английский.txt', 'unit 7 — сделано\nэссе «my ordinary day» — до четверга'));
+  if (s.flags.hw_d2_essay) school.push(txt('my_ordinary_day.txt', s.flags.essay_ren || s.flags.essay_night ? 'My ordinary day is: wake up, school, computer, sleep.\nThe best part of the day is night.' : 'My ordinary day is: wake up, school, friend, sleep.\nThe best part of the day is lunch with Mayu.'));
+  if (s.flags.hw_d4_essay) school.push(txt('my_friend.txt', s.flags.essay_friend_ren ? 'My friend lives far away. We talk at night.' : 'My friend is Mayu. She laughs loud and takes pictures of everything.'));
+  if (st >= 3) school.push(txt('сочинение.txt', 'my ordinary day is\nmy ordinary day is\nmy ordinary day is'));
 
   const desktop: FsNode[] = [
     app('Компьютер', 'explorer', '/assets/icons/computer.png', { path: ['Компьютер'] }),
     app('meromero', 'meromero', '/assets/icons/meromero.png', { page: 'feed' }),
-    app('M Messenger', 'messenger', '/assets/mm/bubble-pink.png'),
-    folder('school', [txt('английский.txt', 'unit 7 — до пятницы\nэссе «my ordinary day» (400 слов)\n\n…my ordinary day is: wake up, school, computer, sleep')], '/assets/icons/folder-docs.png'),
+    app('Уроки', 'homework', '/assets/mm/book.png'),
+    folder('school', school, '/assets/icons/folder-docs.png'),
     folder('music', [...SONGS.map((x) => audio(`${x.title}.mp3`)), ...(s.flags.ren_song ? [audio(REN_SONG.title)] : [])], '/assets/icons/folder-audio.png'),
-    folder('photos', [...nanaPhotos.map(img), ...webcam.map(img)], '/assets/icons/folder-pics.png'),
+    folder('photos', nanaPhotos.map(img), '/assets/icons/folder-pics.png'),
   ];
   if (st < 3) desktop.push(mayuFolder);
-  desktop.push(app('Камера', 'camera', '/assets/icons/snipping.png'), app('Paint', 'paint', '/assets/icons/paint.png'), app('Блокнот', 'notepad', '/assets/icons/notepad.png'));
+  desktop.push(app('Paint', 'paint', '/assets/icons/paint.png'), app('Блокнот', 'notepad', '/assets/icons/notepad.png'));
   if (st >= 2) {
     desktop.push(folder('ren', [...renPhotos.map(img), txt('о нём.txt', '17 — не возраст. просто число которое ему нравится\nслушает то же что и я\nне спит\nотец\nсерая куртка (?)')], '/assets/icons/folder-blue.png'));
   }
@@ -81,7 +96,7 @@ export function buildFs(s: GameState): FsNode {
     folder('Рабочий стол', desktop, '/assets/icons/computer.png'),
     folder('Documents', [...notesFor(s).filter((n) => !n.name.startsWith('untitled') && n.name !== 'не открывать.txt'), folder('school', desktop.find((d) => d.name === 'school')!.children!)], '/assets/icons/folder-documents.png'),
     folder('Downloads', [...(s.flags.ren_song ? [audio(REN_SONG.title)] : []), ...renPhotos.map(img)], '/assets/icons/folder-downloads.png'),
-    folder('Pictures', [...nanaPhotos.map(img), ...mayuPhotos.map(img), ...webcam.map(img)], '/assets/icons/folder-pictures.png'),
+    folder('Pictures', [...nanaPhotos.map(img), ...mayuPhotos.map(img)], '/assets/icons/folder-pictures.png'),
     folder('Music', SONGS.map((x) => audio(`${x.title}.mp3`)), '/assets/icons/folder-music.png'),
     folder('Temp', st >= 3 ? [txt('~tmp0041.tmp', '▒▒▒▒▒▒▒▒▒▒▒ REN_17 ▒▒▒▒▒▒▒▒▒ online ▒▒▒▒▒▒')] : [], '/assets/icons/folder-2.png'),
     folder('Корзина', recycle, recycle.length ? '/assets/icons/recycle-full.png' : '/assets/icons/recycle-empty.png'),

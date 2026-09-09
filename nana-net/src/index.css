@@ -926,82 +926,6 @@ img {
   background: linear-gradient(90deg, #7fc0f5, #f0a6c4);
 }
 
-/* ───────── camera ───────── */
-.camera {
-  flex: 1;
-  background: #111;
-  display: flex;
-  flex-direction: column;
-}
-
-.camera-view {
-  flex: 1;
-  margin: 10px;
-  border: 1px solid #333;
-  position: relative;
-  overflow: hidden;
-  background: #22202a;
-}
-
-.camera-view img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: contrast(0.9) brightness(0.95);
-}
-
-.camera-view .rec {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  color: #ff5b5b;
-  font-family: monospace;
-  font-size: 12px;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.camera-view .rec::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ff5b5b;
-  animation: blink 1s steps(2) infinite;
-}
-
-@keyframes blink {
-  to {
-    opacity: 0;
-  }
-}
-
-.camera-flash {
-  position: absolute;
-  inset: 0;
-  background: #fff;
-  animation: flash 0.45s ease-out forwards;
-}
-
-@keyframes flash {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-.camera-bar {
-  display: flex;
-  gap: 8px;
-  padding: 8px 10px;
-  justify-content: center;
-  background: #1a1a20;
-  border-top: 1px solid #333;
-}
-
 /* ───────── meromero ───────── */
 .mm {
   flex: 1;
@@ -1377,7 +1301,7 @@ img {
   color: #a34d78;
 }
 
-/* ───────── chat (shared by messenger & mm DMs) ───────── */
+/* ───────── chat (meromero DMs) ───────── */
 .chat {
   display: flex;
   flex-direction: column;
@@ -1566,96 +1490,6 @@ img {
   text-align: center;
   border-top: 1px solid #e0e6ee;
   background: #f5f7fa;
-}
-
-/* ───────── messenger ───────── */
-.msgr {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  background: #f4f7fb;
-}
-
-.msgr-me {
-  display: flex;
-  gap: 8px;
-  padding: 8px 10px;
-  background: linear-gradient(180deg, #dfe9f6, #c9d9ec);
-  border-bottom: 1px solid #a7bbd3;
-  align-items: center;
-}
-
-.msgr-me img {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
-  object-fit: cover;
-  border: 1px solid #8ea6c4;
-  background: #cfd5dd;
-}
-
-.msgr-me .nm {
-  font-weight: 600;
-  color: #1c3b5e;
-}
-
-.msgr-me .st {
-  font-size: 11px;
-  color: #4a6480;
-}
-
-.msgr-list {
-  flex: 1;
-  overflow: auto;
-}
-
-.msgr-group {
-  padding: 4px 10px;
-  font-size: 11px;
-  color: #5c6f85;
-  background: #e9eff6;
-  border-bottom: 1px solid #d5dfeb;
-}
-
-.msgr-contact {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 6px 10px;
-  border-bottom: 1px solid #e6ecf3;
-  position: relative;
-}
-
-.msgr-contact:hover {
-  background: #e4eefa;
-}
-
-.msgr-contact img.av {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  object-fit: cover;
-  background: #cfd5dd;
-}
-
-.msgr-contact .nm {
-  font-weight: 600;
-  font-size: 12.5px;
-}
-
-.msgr-contact .st {
-  font-size: 11px;
-  color: #6b7a8b;
-}
-
-.msgr-contact .badge {
-  position: static;
-  margin-left: auto;
-}
-
-.msgr-contact.gone {
-  opacity: 0.5;
 }
 
 /* ───────── paint ───────── */
@@ -2155,4 +1989,558 @@ img {
   background: linear-gradient(90deg, #d5dde7, #b7c4d3);
   border: 1px solid #98a7b8;
   border-radius: 2px;
+}
+
+/* ───────── login sticky note ───────── */
+.sticky {
+  position: absolute;
+  right: 6%;
+  top: 14%;
+  width: 168px;
+  padding: 14px 14px 26px;
+  background: linear-gradient(180deg, #fff7a8, #f7e77a);
+  color: #4a3b12;
+  font: 13px/1.35 'Comic Sans MS', 'Segoe Print', 'Noto Sans', cursive;
+  transform: rotate(3.5deg);
+  box-shadow: 2px 6px 14px rgba(0, 0, 0, 0.45);
+  z-index: 2;
+  user-select: none;
+}
+
+.sticky::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 46px;
+  height: 14px;
+  margin-left: -23px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transform: rotate(-2deg);
+}
+
+.sticky.dark {
+  background: linear-gradient(180deg, #e9d58c, #cdb45e);
+  color: #3a2c08;
+  transform: rotate(-4deg);
+  filter: saturate(0.7);
+}
+
+.sticky-doodle {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  font-size: 18px;
+  opacity: 0.75;
+}
+
+/* ───────── toasts (actionable) ───────── */
+.toast {
+  position: relative;
+  pointer-events: auto;
+}
+
+.toast.actionable:hover {
+  background: #fff;
+  border-color: #4f7fb8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.toast small {
+  display: block;
+  margin-top: 3px;
+  font-size: 10.5px;
+  color: #5a7ba3;
+}
+
+.toast-x {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  border: 0;
+  background: transparent;
+  color: #778;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.toast-x:hover {
+  color: #c33;
+}
+
+/* ───────── Nana's inner voice ───────── */
+.thought {
+  position: absolute;
+  left: 14px;
+  bottom: calc(var(--taskbar-h) + 12px);
+  max-width: 340px;
+  padding: 8px 12px;
+  background: rgba(20, 24, 34, 0.82);
+  color: #e9e6f0;
+  border-left: 2px solid var(--pink);
+  border-radius: 3px;
+  font-size: 12.5px;
+  font-style: italic;
+  line-height: 1.4;
+  z-index: 98000;
+  pointer-events: none;
+  animation: thought-in 0.6s ease-out, thought-out 0.9s ease-in 5.5s forwards;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes thought-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes thought-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ───────── end of day ───────── */
+.tray .sysicon.moon img {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 3px rgba(255, 240, 180, 0.6));
+}
+
+.tray .sysicon.moon.pulse img {
+  animation: pulse 2.2s infinite;
+}
+
+.badge.soft {
+  background: #6f8fb8;
+}
+
+.sleep-prompt {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--taskbar-h) + 10px);
+  width: 320px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: rgba(18, 22, 34, 0.94);
+  color: #e6e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  z-index: 99500;
+  animation: toast-in 0.25s ease-out;
+}
+
+.sleep-prompt > img {
+  width: 30px;
+  height: 30px;
+}
+
+.sleep-prompt > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sleep-prompt b {
+  font-size: 13px;
+}
+
+.sleep-prompt span {
+  font-size: 11.5px;
+  color: #aab;
+  line-height: 1.35;
+}
+
+.sleep-prompt .btn {
+  color: #223;
+  align-self: center;
+  white-space: nowrap;
+}
+
+/* ───────── homework ───────── */
+.hw {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fbfaf5 repeating-linear-gradient(180deg, transparent 0 23px, rgba(120, 150, 200, 0.18) 23px 24px);
+  color: #2a3542;
+  font-size: 12.5px;
+}
+
+.hw-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #f3f6fa, #e2e9f2);
+  border-bottom: 1px solid #c3d1e0;
+}
+
+.hw-head > img {
+  width: 28px;
+  height: 28px;
+}
+
+.hw-head b {
+  font-size: 13.5px;
+}
+
+.hw-head > .btn {
+  margin-left: auto;
+}
+
+.hw-sub {
+  font-size: 11px;
+  color: #6b7c90;
+}
+
+.hw-score {
+  margin-left: auto;
+  font-size: 11px;
+  color: #5c6f86;
+  text-align: right;
+}
+
+.hw-list {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hw-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #cdd8e3;
+  border-radius: 4px;
+}
+
+.hw-item.clickable:hover {
+  border-color: #5c9ad8;
+  background: #f3f8fd;
+}
+
+.hw-item.done {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.hw-item > div {
+  flex: 1;
+}
+
+.hw-kind {
+  font-size: 11px;
+  color: #6b7c90;
+  white-space: nowrap;
+}
+
+.hw-foot {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: #6b7c90;
+  border-top: 1px dashed #d3dde9;
+  font-style: italic;
+}
+
+.hw-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hw-body.center {
+  align-items: center;
+  justify-content: center;
+}
+
+.hw-q {
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #cdd8e3;
+  border-left: 3px solid var(--blue);
+}
+
+.hw-q.shaky {
+  animation: shake 3s infinite;
+}
+
+.hw-opts {
+  padding: 0;
+  border: 0;
+}
+
+.hw-opts .choice.right {
+  border-color: #4caf7d;
+  background: #eaf7ef;
+}
+
+.hw-opts .choice.wrong {
+  border-color: #d9578f;
+  background: #fbeef3;
+  text-decoration: line-through;
+}
+
+.hw-opts .choice.dim {
+  opacity: 0.5;
+}
+
+.hw-opts .choice.essay {
+  font-style: italic;
+}
+
+.hw-next {
+  align-self: flex-end;
+}
+
+.hw-result {
+  font-size: 44px;
+  font-weight: 300;
+  color: #3c4d61;
+}
+
+/* ───────── meromero registration ───────── */
+.mm-reg-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.mm-reg-card {
+  width: 380px;
+  max-width: 100%;
+}
+
+.mm-reg-hero {
+  text-align: center;
+  padding: 22px 16px 10px;
+}
+
+.mm-reg-hero img {
+  width: 64px;
+  height: 64px;
+}
+
+.mm-reg-hero h2 {
+  margin: 8px 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #c2417c;
+}
+
+.mm-reg-hero p {
+  margin: 0;
+  color: #6b7c90;
+}
+
+.mm-reg-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 14px 14px;
+}
+
+.mm-reg-foot {
+  text-align: center;
+  font-size: 10.5px;
+  color: #98a5b3;
+  padding-bottom: 10px;
+}
+
+.mm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mm-form label {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #6b7c90;
+  text-transform: lowercase;
+}
+
+.mm-note {
+  font-size: 10.5px;
+  color: #98a5b3;
+  font-style: italic;
+}
+
+.mm-captcha {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mm-captcha-img {
+  display: inline-block;
+  padding: 4px 12px;
+  background: repeating-linear-gradient(135deg, #e8eef5 0 4px, #d4dfeb 4px 8px);
+  border: 1px solid #b7c6d6;
+  font: 18px/1 'Courier New', monospace;
+  letter-spacing: 4px;
+  color: #3c4d61;
+  transform: skewX(-8deg);
+  user-select: none;
+}
+
+.mm-themes {
+  display: flex;
+  gap: 8px;
+}
+
+.mm-theme {
+  flex: 1;
+  height: 54px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: flex-end;
+}
+
+.mm-theme span {
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 0 3px 0 3px;
+}
+
+.mm-theme.active {
+  border-color: var(--pink-deep);
+}
+
+.mm-preview {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background: #f5f8fb;
+  border: 1px dashed #cdd8e3;
+  border-radius: 4px;
+}
+
+.mm-preview img.av {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+}
+
+/* ───────── interlude (school day) ───────── */
+.interlude {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 30%, #f2e9dc, #cbbfae 70%, #a89b8a);
+  color: #3b3128;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px;
+  box-sizing: border-box;
+  animation: fadein 1.2s;
+  position: relative;
+}
+
+.interlude.st2 {
+  background: radial-gradient(ellipse at 50% 30%, #d8d3cc, #a19a92 70%, #6e6862);
+  color: #2a2521;
+}
+
+.interlude.st3 {
+  background: radial-gradient(ellipse at 50% 30%, #6a6c74, #3a3b42 70%, #15161a);
+  color: #cfd0d6;
+}
+
+.interlude-head {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.interlude-lines {
+  max-width: 520px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.interlude-lines p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 300;
+  animation: fadein 0.9s;
+}
+
+.interlude-lines p.quote {
+  font-style: italic;
+  opacity: 0.85;
+  padding-left: 12px;
+  border-left: 2px solid currentColor;
+}
+
+.interlude-go {
+  margin-top: 10px;
+}
+
+.interlude-skip {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.5;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.interlude-skip:hover {
+  opacity: 1;
+}
+
+/* ───────── music (real tracks) ───────── */
+.music.dark {
+  background: #0b0d12;
+  color: #b9bcc8;
+}
+
+.music-bar.clickable {
+  cursor: pointer;
 }

@@ -9,19 +9,21 @@ const sys = (text: string): Step => ({ type: 'msg', from: 'system', text });
 const on = (c: 'ren' | 'mayu'): Step => ({ type: 'status', contact: c, online: true });
 const off = (c: 'ren' | 'mayu'): Step => ({ type: 'status', contact: c, online: false });
 const pause = (ms: number): Step => ({ type: 'pause', ms });
+const think = (text: string): Step => ({ type: 'think', text });
 
 export const CONVERSATIONS: Conversation[] = [
   // ───────────────────────── DAY 1 · только Маю ─────────────────────────
   {
     id: 'd1_mayu_hello',
     contact: 'mayu',
-    channel: 'meromero',
-    day: 1,
     at: t(19, 46),
+    when: (s) => !!s.flags.mm_registered && !s.flags.mayu_friend,
     steps: [
+      on('mayu'),
+      think('зелёный кружок. маю. ну конечно.'),
       my('НАНА'),
       my('НАНА ТЫ ЗАРЕГАЛАСЬ НАКОНЕЦ'),
-      my('я тебя уже нашла ✌🏻'),
+      my('я тебя нашла по нику ✌🏻'),
       my('у меня на странице 0 друзей это стыдно, добавь меня'),
       { type: 'toast', title: 'meromero', text: 'mayu☆ хочет добавить тебя в друзья' },
       {
@@ -31,14 +33,16 @@ export const CONVERSATIONS: Conversation[] = [
           { text: 'сейчас, я ещё оформляю', mayu: 1, then: [my('ок ок'), my('только не делай всё серое как обычно'), my('поставь розовое!!!')] },
         ],
       },
+      { type: 'set', flags: ['mayu_friend'] },
+      { type: 'toast', title: 'meromero', text: 'mayu☆ теперь у тебя в друзьях', icon: '/assets/mm/heart-small.png' },
       my('поставь статус и песню в профиле. и запости что-нибудь. ну хоть «привет»'),
       my('я пошла есть. потом проверю ✌🏻'),
+      think('«запости что-нибудь». что. про что вообще пишут.'),
     ],
   },
   {
     id: 'd1_mayu_checks_post',
     contact: 'mayu',
-    channel: 'meromero',
     day: 1,
     at: t(20, 20),
     when: (s) => !!s.flags.posted,
@@ -46,12 +50,12 @@ export const CONVERSATIONS: Conversation[] = [
       { type: 'like', author: 'mayu☆' },
       { type: 'comment', author: 'mayu☆', text: 'первая запись!!! ✌🏻' },
       my('видела. лайк. ✌🏻'),
+      think('один лайк. от маю. это считается.'),
     ],
   },
   {
     id: 'd1_mayu_no_post',
     contact: 'mayu',
-    channel: 'meromero',
     day: 1,
     at: t(21, 30),
     when: (s) => !s.flags.posted,
@@ -60,7 +64,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd1_mayu_cafe',
     contact: 'mayu',
-    channel: 'meromero',
     day: 1,
     at: t(22, 5),
     steps: [
@@ -78,22 +81,38 @@ export const CONVERSATIONS: Conversation[] = [
       off('mayu'),
     ],
   },
+  {
+    id: 'd1_mayu_hw',
+    contact: 'mayu',
+    day: 1,
+    at: t(21, 0),
+    when: (s) => s.mayuOnline,
+    steps: [
+      my('слушай а ты англ сделала? unit 7'),
+      {
+        type: 'choice',
+        options: [
+          { text: 'сделала. ещё днём', mayu: 1, flags: ['hw_brag'], then: [my('зубрилка'), my('скинь ответы ✌🏻'), my('шучу. не шучу')] },
+          { text: 'нет ещё. сейчас сяду', mayu: 0, then: [my('ага. «сейчас»'), my('я тоже «сейчас». уже третий час')] },
+          { text: 'какой юнит', mayu: 0, flags: ['hw_forgot'], then: [my('НАНА'), my('седьмой. тест завтра. ты вообще была на уроке')] },
+        ],
+      },
+    ],
+  },
   // тихий первый след: чей-то лайк поздно ночью
   {
     id: 'd1_stranger_like',
     contact: 'ren',
-    channel: 'meromero',
     day: 1,
     at: t(23, 50),
     when: (s) => !!s.flags.posted,
-    steps: [{ type: 'like', author: 'REN_17' }, { type: 'set', flags: ['ren_liked'] }],
+    steps: [{ type: 'like', author: 'REN_17' }, { type: 'set', flags: ['ren_liked'] }, think('кто-то с ником через нижнее подчёркивание. поздно не спит. ну ок.')],
   },
 
   // ───────────────────────── DAY 2 · кафе, первый комментарий ─────────────────────────
   {
     id: 'd2_mayu_cafe_yes',
     contact: 'mayu',
-    channel: 'meromero',
     day: 2,
     at: t(19, 46),
     when: (s) => !!s.flags.d1_cafe_yes,
@@ -104,12 +123,12 @@ export const CONVERSATIONS: Conversation[] = [
       { type: 'post', author: 'mayu', text: 'блинчики > всё. нана не согласна но она не права 🥞✌🏻', photo: 'cafe_mayu' },
       { type: 'set', flags: ['photo_cafe'] },
       my('в субботу повторим?'),
+      my('и напиши что-то про кафе. для истории ✌🏻'),
     ],
   },
   {
     id: 'd2_mayu_cafe_no',
     contact: 'mayu',
-    channel: 'meromero',
     day: 2,
     at: t(19, 46),
     when: (s) => !s.flags.d1_cafe_yes,
@@ -125,7 +144,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd2_ren_comment',
     contact: 'ren',
-    channel: 'meromero',
     day: 2,
     at: t(21, 10),
     when: (s) => !!s.flags.posted,
@@ -133,22 +151,30 @@ export const CONVERSATIONS: Conversation[] = [
       pause(3000),
       { type: 'comment', author: 'REN_17', text: 'я тоже постоянно не сплю ночью' },
       { type: 'set', flags: ['ren_commented'] },
+      think('опять он. ren_17. комментирует, как будто мы знакомы.'),
     ],
   },
   {
     id: 'd2_mayu_late',
     contact: 'mayu',
-    channel: 'meromero',
     day: 2,
     at: t(23, 20),
-    steps: [my('ты чего не спишь? я вижу зелёный кружок'), my('ложись. завтра контрольная'), off('mayu')],
+    when: (s) => s.mayuOnline,
+    steps: [my('ты чего не спишь? я вижу зелёный кружок'), my('ложись. завтра история'), off('mayu')],
+  },
+  {
+    id: 'd2_mayu_hw_check',
+    contact: 'mayu',
+    day: 2,
+    at: t(20, 40),
+    when: (s) => s.mayuOnline && !!s.flags.hw_forgot,
+    steps: [my('кстати. ты вчера тест по англ так и не сделала, да?'), my('я видела твоё лицо на уроке ✌🏻'), { type: 'set', mayu: -1 }],
   },
 
   // ───────────────────────── DAY 3 · первое сообщение ─────────────────────────
   {
     id: 'd3_ren_comment_again',
     contact: 'ren',
-    channel: 'meromero',
     day: 3,
     at: t(19, 50),
     when: (s) => !!s.flags.posted && !s.flags.ren_known,
@@ -157,7 +183,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd3_mayu_walk',
     contact: 'mayu',
-    channel: 'meromero',
     day: 3,
     at: t(20, 15),
     steps: [
@@ -196,13 +221,13 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd3_ren_first_dm',
     contact: 'ren',
-    channel: 'messenger',
     day: 3,
     at: t(22, 30),
     when: (s) => !!s.flags.ren_known,
     steps: [
       on('ren'),
       pause(5000),
+      think('он в сети. тот, который комментирует. ладно, и что.'),
       r('привет. это ren_17, я под твоими записями комментировал'),
       r('надеюсь не странно, что пишу в личку'),
       r('просто у тебя в профиле песня стоит. я её слушал всё лето. думал, никто её не знает'),
@@ -218,6 +243,7 @@ export const CONVERSATIONS: Conversation[] = [
       r('спокойной ночи'),
       pause(1500),
       off('ren'),
+      think('«значит нас двое». я перечитала это три раза. зачем.'),
     ],
   },
 
@@ -225,7 +251,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd4_mayu_bakery',
     contact: 'mayu',
-    channel: 'messenger',
     day: 4,
     at: t(19, 44),
     steps: [
@@ -245,7 +270,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd4_ren_talk',
     contact: 'ren',
-    channel: 'messenger',
     day: 4,
     at: t(22, 40),
     when: (s) => !!s.flags.ren_known,
@@ -287,7 +311,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd5_mayu',
     contact: 'mayu',
-    channel: 'messenger',
     day: 5,
     at: t(20, 5),
     when: (s) => s.mayu >= 6,
@@ -308,7 +331,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd5_mayu_low',
     contact: 'mayu',
-    channel: 'messenger',
     day: 5,
     at: t(20, 5),
     when: (s) => s.mayu < 6,
@@ -329,7 +351,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd5_ren_silent',
     contact: 'ren',
-    channel: 'messenger',
     day: 5,
     at: t(21, 0),
     when: (s) => !!s.flags.ren_known,
@@ -338,7 +359,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd5_ren_late',
     contact: 'ren',
-    channel: 'messenger',
     day: 5,
     at: t(25, 15),
     when: (s) => !!s.flags.ren_known,
@@ -355,34 +375,22 @@ export const CONVERSATIONS: Conversation[] = [
           { text: 'нет', ren: -1, mayu: 1, then: [r('ок'), r('хорошо что нет')] },
         ],
       },
-      r('можно попросить? отправь мне свою фотографию. любую. с вебки'),
+      r('можно попросить? отправь мне свою фотографию. любую'),
       r('я просто хочу знать, с кем говорю'),
+      think('у меня одно фото, где видно лицо. с вебки. прошлогоднее. оно в папке photos.'),
       {
         type: 'choice',
         options: [
-          { text: 'сейчас. секунду', ren: 2, flags: ['asked_photo'], then: [sys('Открой «Камера», сделай снимок — потом вернись в чат.')] },
-          { text: 'не сейчас. я ужасно выгляжу в 1:20 ночи', ren: -1, mayu: 1, then: [r('ты не можешь ужасно выглядеть'), r('ладно. когда захочешь')] },
+          { text: 'вот. старое. не смейся', photo: 'nana_old', ren: 3, flags: ['asked_photo', 'sent_photo'], then: [r('…'), r('ты красивая'), r('я так и думал'), r('спасибо')] },
+          { text: 'не сейчас. я ужасно выгляжу в 1:20 ночи', ren: -1, mayu: 1, flags: ['kept_photo'], then: [r('ты не можешь ужасно выглядеть'), r('ладно. когда захочешь')] },
         ],
       },
       r('я скинул тебе одну песню. она в загрузках. без названия'),
       { type: 'set', flags: ['ren_song'] },
+      { type: 'toast', title: 'Загрузки', text: 'track07.mp3 — загрузка завершена', icon: '/assets/icons/media-player.png' },
       r('послушай когда меня не будет'),
       off('ren'),
-    ],
-  },
-  {
-    id: 'send_photo',
-    contact: 'ren',
-    channel: 'messenger',
-    when: (s) => !!s.flags.asked_photo && !s.flags.sent_photo && s.photosTaken > 0 && s.renOnline,
-    steps: [
-      {
-        type: 'choice',
-        options: [
-          { text: 'вот. не смейся', photo: 'webcam_last', ren: 3, flags: ['sent_photo'], then: [r('…'), r('ты красивая'), r('я так и думал'), r('спасибо')] },
-          { text: 'передумала', ren: -1, mayu: 1, flags: ['sent_photo', 'kept_photo'], then: [r('ладно'), r('я не обижаюсь')] },
-        ],
-      },
+      think('track07. без названия. в загрузках. потом. сейчас.'),
     ],
   },
 
@@ -390,7 +398,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd6_mayu_silence',
     contact: 'mayu',
-    channel: 'messenger',
     day: 6,
     at: t(19, 50),
     when: (s) => s.mayu < 8,
@@ -399,7 +406,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd6_mayu_ok',
     contact: 'mayu',
-    channel: 'messenger',
     day: 6,
     at: t(19, 50),
     when: (s) => s.mayu >= 8,
@@ -408,7 +414,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd6_ren_photo2',
     contact: 'ren',
-    channel: 'messenger',
     day: 6,
     at: t(22, 10),
     when: (s) => !!s.flags.ren_known,
@@ -458,7 +463,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd6_ren_conflict',
     contact: 'ren',
-    channel: 'messenger',
     day: 6,
     at: t(25, 20),
     when: (s) => !!s.flags.doubt_strong,
@@ -497,7 +501,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd6_ren_meet',
     contact: 'ren',
-    channel: 'messenger',
     day: 6,
     at: t(25, 20),
     when: (s) => !!s.flags.ren_known && !s.flags.doubt_strong,
@@ -520,14 +523,14 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd6_ren_gone',
     contact: 'ren',
-    channel: 'messenger',
     day: 6,
     at: t(27, 0),
     when: (s) => !!s.flags.need_time,
     steps: [
       sys('Контакт REN_17 больше не существует'),
       { type: 'set', flags: ['ren_gone'] },
-      { type: 'toast', title: 'M Messenger', text: 'Пользователь не найден', icon: '/assets/mm/dot-grey.png' },
+      { type: 'toast', title: 'meromero', text: 'Пользователь не найден', icon: '/assets/mm/dot-grey.png' },
+      think('«пользователь не найден». я обновила страницу. ещё раз. ещё.'),
       { type: 'wallpaper', value: 'night' },
     ],
   },
@@ -536,7 +539,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd7_gone_ending',
     contact: 'mayu',
-    channel: 'messenger',
     day: 7,
     at: t(19, 45),
     when: (s) => !!s.flags.ren_gone,
@@ -558,7 +560,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd7_meet_ending',
     contact: 'ren',
-    channel: 'messenger',
     day: 7,
     at: t(19, 45),
     when: (s) => !!s.flags.meet_agreed && !s.flags.ren_gone,
@@ -585,7 +586,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd7_no_ren_ending',
     contact: 'mayu',
-    channel: 'messenger',
     day: 7,
     at: t(19, 45),
     when: (s) => !s.flags.ren_known,
@@ -605,7 +605,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'd7_final',
     contact: 'ren',
-    channel: 'messenger',
     day: 7,
     at: t(19, 45),
     when: (s) => !!s.flags.ren_known && !s.flags.meet_agreed && !s.flags.ren_gone,
@@ -622,7 +621,7 @@ export const CONVERSATIONS: Conversation[] = [
         type: 'choice',
         options: [
           {
-            text: '[Закрыть Messenger и выйти к Маю]',
+            text: '[Закрыть meromero и выйти к Маю]',
             mayu: 3,
             flags: ['final_mayu'],
             then: [n('рэн, я пойду. напишу позже. может быть'), r('…'), r('хорошо'), off('ren'), my('ВИЖУ ТЕБЯ'), pause(2000), { type: 'end', ending: 'mayu' }],
@@ -658,7 +657,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'status_die_mayu',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => hasStatus(s, 'die') && s.mayuOnline,
     steps: [
       pause(4000),
@@ -677,28 +675,24 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'status_die_ren',
     contact: 'ren',
-    channel: 'messenger',
     when: (s) => hasStatus(s, 'die') && !!s.flags.ren_known && s.renOnline,
     steps: [pause(6000), r('видел твой статус'), r('я тоже так иногда'), r('не убирай. пусть висит. это честно'), { type: 'set', ren: 2, flags: ['ren_saw_die'] }],
   },
   {
     id: 'status_mayu_love',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => hasStatus(s, 'mayu') && s.mayuOnline,
     steps: [pause(3000), my('НАНА Я ВИДЕЛА СТАТУС'), my('😭✌🏻'), my('я тоже тебя люблю. дура'), { type: 'post', author: 'mayu', text: 'у меня лучшая подруга в мире и это официально (см. её статус) ✌🏻' }, { type: 'set', mayu: 2, flags: ['status_love_seen'] }],
   },
   {
     id: 'status_pancakes',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => hasStatus(s, 'pancakes') && s.mayuOnline,
     steps: [pause(3000), my('✌🏻✌🏻✌🏻'), my('ты украла мой статус и я не против'), { type: 'set', mayu: 1 }],
   },
   {
     id: 'status_bored',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => hasStatus(s, 'bored') && s.mayuOnline && s.day <= 5,
     steps: [
       pause(3000),
@@ -716,21 +710,18 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'status_sleepless_mayu',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => (hasStatus(s, 'sleepless') || hasStatus(s, 'night')) && s.mayuOnline && !s.flags.ren_known,
     steps: [pause(3000), my('«не спится»??'), my('нана сейчас 10 вечера'), my('ложись раньше и будет спаться')],
   },
   {
     id: 'status_sleepless_ren',
     contact: 'ren',
-    channel: 'messenger',
     when: (s) => (hasStatus(s, 'sleepless') || hasStatus(s, 'night')) && !!s.flags.ren_known && s.renOnline,
     steps: [pause(4000), r('не спится?'), r('мне тоже'), r('хороший статус'), { type: 'set', ren: 1 }],
   },
   {
     id: 'status_waiting',
     contact: 'ren',
-    channel: 'messenger',
     when: (s) => hasStatus(s, 'waiting') && !!s.flags.ren_known && s.renOnline,
     steps: [
       pause(4000),
@@ -748,7 +739,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'status_nobody',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => hasStatus(s, 'nobody') && s.mayuOnline,
     steps: [
       pause(3000),
@@ -768,28 +758,24 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'song_first',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => !!s.profile.song && s.mayuOnline,
     steps: [pause(3000), my('о, песня появилась'), my('лучше чем тишина. но я бы поставила что-то повеселее ✌🏻'), { type: 'set', flags: ['song_seen_mayu'] }],
   },
   {
     id: 'song_sleepless_mayu',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => s.profile.song.startsWith('sleepless') && s.mayuOnline && !!s.flags.song_seen_mayu,
     steps: [pause(3000), my('ты поставила sleepless'), my('ты спишь вообще?'), { type: 'set', mayu: 0 }],
   },
   {
     id: 'song_ren_reacts',
     contact: 'ren',
-    channel: 'messenger',
     when: (s) => !!s.profile.song && !s.profile.song.startsWith('track07') && !!s.flags.ren_known && s.renOnline,
     steps: [pause(4000), r('у тебя в профиле новая песня. я её знаю. это хорошая'), { type: 'set', ren: 1, flags: ['song_seen_ren'] }],
   },
   {
     id: 'song_track07_ren',
     contact: 'ren',
-    channel: 'messenger',
     when: (s) => !!s.flags.listened_ren_song && !!s.flags.ren_known && s.renOnline && !s.flags.ren_gone,
     steps: [
       pause(3000),
@@ -807,7 +793,6 @@ export const CONVERSATIONS: Conversation[] = [
   {
     id: 'song_track07_profile',
     contact: 'mayu',
-    channel: 'meromero',
     when: (s) => s.profile.song.startsWith('track07') && s.mayuOnline,
     steps: [pause(3000), my('что за track07'), my('у него даже названия нет'), my('это от него, да?'), { type: 'set', mayu: -1, flags: ['mayu_knows_track07'] }],
   },
@@ -817,7 +802,7 @@ export const ENDINGS: Record<string, Ending> = {
   mayu: {
     title: 'MAYU',
     lines: [
-      'Нана закрывает Messenger.',
+      'Нана закрывает meromero.',
       'На улице холодно и пахнет дождём. Маю уже машет с другой стороны дороги.',
       'Финальная фотография этого дня — ужасного качества. Размытая. Пересвеченная. Маю смеётся, Нана почти улыбается.',
       'Именно поэтому она выглядит самой настоящей.',
@@ -829,7 +814,7 @@ export const ENDINGS: Record<string, Ending> = {
   },
   user_not_found: {
     title: 'USER NOT FOUND',
-    lines: ['Профиль REN_17 исчез.', 'Никакого объяснения. Никакого последнего сообщения.', 'Нана ещё несколько недель открывает Messenger по привычке.', 'Она никогда не узнает, куда он пропал.'],
+    lines: ['Профиль REN_17 исчез.', 'Никакого объяснения. Никакого последнего сообщения.', 'Нана ещё несколько недель открывает «Сообщения» по привычке.', 'Она никогда не узнает, куда он пропал.'],
   },
   meet_me: {
     title: 'MEET ME',
@@ -847,7 +832,7 @@ export const ENDINGS: Record<string, Ending> = {
       'Нана разворачивается.',
       'В электричке она смотрит на его последнее сообщение: «серая куртка».',
       'Она не отвечает. Он не пишет.',
-      'Через неделю она понимает, что скучает не по нему. А по тому, кем он был в окне Messenger.',
+      'Через неделю она понимает, что скучает не по нему. А по тому, кем он был в окне сообщений.',
     ],
   },
   log_off: {

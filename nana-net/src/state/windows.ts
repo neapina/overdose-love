@@ -1,14 +1,14 @@
-import { getState, setState, type AppId, type WindowState } from './store';
+import { getState, setState, stage, think, type AppId, type WindowState } from './store';
 import { playSound } from '../os/sounds';
+import { appOpenedThought } from '../story/voice';
 
 export const APP_META: Record<AppId, { title: string; icon: string; w: number; h: number; single?: boolean }> = {
   explorer: { title: 'Проводник', icon: '/assets/icons/folder-documents.png', w: 720, h: 460 },
   notepad: { title: 'Блокнот', icon: '/assets/icons/notepad.png', w: 520, h: 380 },
   photos: { title: 'Фотографии', icon: '/assets/icons/folder-pictures.png', w: 700, h: 480, single: true },
   music: { title: 'Музыка', icon: '/assets/icons/media-player.png', w: 420, h: 340, single: true },
-  camera: { title: 'Камера', icon: '/assets/icons/snipping.png', w: 520, h: 440, single: true },
   meromero: { title: 'meromero', icon: '/assets/icons/meromero.png', w: 900, h: 600, single: true },
-  messenger: { title: 'M Messenger', icon: '/assets/mm/bubble-pink.png', w: 380, h: 560, single: true },
+  homework: { title: 'Уроки', icon: '/assets/mm/book.png', w: 620, h: 460, single: true },
   paint: { title: 'Paint', icon: '/assets/icons/paint.png', w: 640, h: 480, single: true },
   personalize: { title: 'Персонализация', icon: '/assets/icons/control-panel.png', w: 560, h: 420, single: true },
   imageview: { title: 'Просмотр фотографий', icon: '/assets/icons/folder-pics.png', w: 640, h: 500 },
@@ -51,6 +51,12 @@ export function openWindow(app: AppId, props?: Record<string, unknown>, titleOve
   };
   setState({ windows: [...s.windows, win], nextWindowId: id + 1, startOpen: false });
   playSound('open');
+  const flag = `opened_${app}_s${stage(s)}`;
+  if (!s.flags[flag]) {
+    const line = appOpenedThought(app, s);
+    setState((st) => ({ flags: { ...st.flags, [flag]: true } }));
+    if (line) setTimeout(() => think(line), 700);
+  }
   return id;
 }
 

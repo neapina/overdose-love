@@ -1,5 +1,7 @@
-import { formatClock, setState, useGameState } from '../state/store';
+import { formatClock, isAfternoon, setState, stage, useGameState } from '../state/store';
 import { APP_META, focusWindow, minimizeWindow, openWindow, topWindowId } from '../state/windows';
+import { goToSleep, remainingToday } from '../story/engine';
+import { homeworkLeft } from '../story/school';
 import { playSound } from './sounds';
 
 export function Taskbar() {
@@ -7,12 +9,17 @@ export function Taskbar() {
   const top = topWindowId();
   const unread = s.unread.ren + s.unread.mayu;
   const showRen = !!s.flags.ren_known && !s.flags.ren_gone;
+  const hwLeft = homeworkLeft(s).length;
+  const late = s.clock >= 23 * 60;
+  const dayDone = late && remainingToday(s).length === 0 && !s.activeConversation;
+  const st = stage(s);
 
   return (
     <div className="taskbar">
       <div
         className="start clickable"
         role="button"
+        title="Пуск"
         onClick={() => {
           playSound('click');
           setState((st) => ({ startOpen: !st.startOpen }));
@@ -24,12 +31,13 @@ export function Taskbar() {
         <div className="task pinned clickable" role="button" title="Проводник" onClick={() => openWindow('explorer')}>
           <img src="/assets/icons/folder-documents.png" alt="" />
         </div>
-        <div className="task pinned clickable" role="button" title="meromero" onClick={() => openWindow('meromero')}>
+        <div className="task pinned clickable" role="button" title="meromero" onClick={() => openWindow('meromero', unread ? { page: 'messages', contact: s.unread.ren > 0 ? 'ren' : 'mayu' } : undefined)}>
           <img src="/assets/icons/meromero.png" alt="" />
-        </div>
-        <div className="task pinned clickable" role="button" title="M Messenger" onClick={() => openWindow('messenger')}>
-          <img src="/assets/mm/bubble-pink.png" alt="" />
           {unread > 0 && <span className="badge">{unread}</span>}
+        </div>
+        <div className="task pinned clickable" role="button" title={hwLeft ? `Уроки · осталось ${hwLeft}` : 'Уроки'} onClick={() => openWindow('homework')}>
+          <img src="/assets/mm/book.png" alt="" />
+          {hwLeft > 0 && isAfternoon(s) && <span className="badge soft">{hwLeft}</span>}
         </div>
         {s.windows.map((w) => (
           <div
@@ -52,23 +60,62 @@ export function Taskbar() {
             <i className={`dot ${s.renOnline ? 'on' : 'off'}`} /> REN_17
           </div>
         )}
-        <span
-          className="sysicon clickable"
-          role="button"
-          title={s.muted ? 'Звук выключен' : 'Звук'}
-          onClick={() => setState((st) => ({ muted: !st.muted }))}
-        >
+        {late && (
+          <span
+            className={`sysicon clickable moon ${dayDone ? 'pulse' : ''}`}
+            role="button"
+            title={dayDone ? 'На сегодня всё. Лечь спать' : 'Лечь спать (день закончится)'}
+            onClick={() => {
+              playSound('click');
+              setState({ sleepPrompt: true });
+            }}
+          >
+            <img src="/assets/mm/moon.png" alt="" />
+          </span>
+        )}
+        <span className="sysicon clickable" role="button" title={s.muted ? 'Звук выключен' : 'Звук'} onClick={() => setState((st) => ({ muted: !st.muted }))}>
           {s.muted ? '🔇' : '🔊'}
         </span>
         <span className="sysicon" title="Сеть: подключено">
           📶
         </span>
-        <div className="clock" title={`день ${s.day}`}>
+        <div className="clock" title={`день ${s.day} · ${isAfternoon(s) ? 'день' : late ? 'ночь' : 'вечер'}`}>
           {formatClock(s.clock)}
           <small>{dateFor(s.day)}</small>
         </div>
         <div className="show-desktop clickable" role="button" title="Свернуть все окна" onClick={() => s.windows.forEach((w) => !w.minimized && minimizeWindow(w.id))} />
       </div>
+      {s.sleepPrompt && (
+        <div className="sleep-prompt" onPointerDown={(e) => e.stopPropagation()}>
+          <img src="/assets/mm/moon.png" alt="" />
+          <div>
+            <b>{st >= 2 ? 'Лечь? Он может ещё написать.' : 'Лечь спать?'}</b>
+            <span>
+              {formatClock(s.clock)} · день {s.day} закончится
+              {hwLeft && s.day < 7 ? ` · домашка не сделана (${hwLeft})` : ''}
+              {unread ? ` · непрочитанных: ${unread}` : ''}
+            </span>
+          </div>
+          <button
+            className="btn primary"
+            onClick={() => {
+              setState({ sleepPrompt: false });
+              goToSleep(false);
+            }}
+          >
+            Спать
+          </button>
+          <button
+            className="btn"
+            onClick={() => {
+              playSound('click');
+              setState({ sleepPrompt: false });
+            }}
+          >
+            {st >= 2 ? 'Ещё чуть-чуть' : 'Ещё немного'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

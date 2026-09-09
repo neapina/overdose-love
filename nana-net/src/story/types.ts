@@ -19,6 +19,8 @@ export type Step =
   | { type: 'status'; contact: Contact; online: boolean }
   | { type: 'pause'; ms: number }
   | { type: 'toast'; title: string; text: string; icon?: string }
+  /** Nana's inner voice */
+  | { type: 'think'; text: string }
   /** comment on Nana's latest post */
   | { type: 'comment'; author: string; text: string }
   /** like on Nana's latest post */
@@ -30,7 +32,6 @@ export type Step =
 export interface Conversation {
   id: string;
   contact: Contact;
-  channel: 'meromero' | 'messenger';
   /** if omitted — can happen on any day (once) */
   day?: number;
   /** in-game minutes since 00:00 of the day (may be >= 1440 for after-midnight); omitted = as soon as `when` holds */

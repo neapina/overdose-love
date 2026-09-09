@@ -1,15 +1,14 @@
 import { useSyncExternalStore } from 'react';
 import { CONFIG } from '../config';
 
-export type Phase = 'boot' | 'login' | 'desktop' | 'sleep' | 'ending';
+export type Phase = 'boot' | 'login' | 'desktop' | 'sleep' | 'interlude' | 'ending';
 export type AppId =
   | 'explorer'
   | 'notepad'
   | 'photos'
   | 'music'
-  | 'camera'
   | 'meromero'
-  | 'messenger'
+  | 'homework'
   | 'paint'
   | 'personalize'
   | 'imageview';
@@ -39,7 +38,6 @@ export interface ChatMessage {
   day: number;
   time: number; // in-game minutes
   photo?: string; // photo id
-  channel: 'meromero' | 'messenger';
 }
 
 export interface Post {
@@ -55,6 +53,7 @@ export interface Post {
 }
 
 export interface Profile {
+  nick: string;
   avatar: number;
   status: string;
   song: string;
@@ -84,16 +83,34 @@ export interface GameState {
   nextWindowId: number;
   nextMessageId: number;
   wallpaper: 'day' | 'dusk' | 'night';
-  photosTaken: number;
+  /** school performance, grows with finished homework */
+  school: number;
+  /** homework tasks finished today (ids) */
+  homeworkDone: string[];
   ending: string | null;
-  toasts: { id: number; title: string; text: string; icon?: string }[];
+  toasts: Toast[];
+  thought: { id: number; text: string } | null;
+  sleepPrompt: boolean;
   muted: boolean;
   effects: boolean;
   startOpen: boolean;
   sleepCount: number;
 }
 
-const SAVE_KEY = 'nana-net-save-v2';
+export interface ToastAction {
+  app: AppId;
+  props?: Record<string, unknown>;
+}
+
+export interface Toast {
+  id: number;
+  title: string;
+  text: string;
+  icon?: string;
+  action?: ToastAction;
+}
+
+const SAVE_KEY = 'nana-net-save-v3';
 
 export function initialState(): GameState {
   return {
@@ -109,7 +126,7 @@ export function initialState(): GameState {
     pendingChoice: null,
     messages: [],
     posts: [],
-    profile: { avatar: 0, status: '', song: '', theme: 'sakura' },
+    profile: { nick: '', avatar: 0, status: '', song: '', theme: 'sakura' },
     unread: { ren: 0, mayu: 0 },
     renOnline: false,
     mayuOnline: true,
@@ -119,9 +136,12 @@ export function initialState(): GameState {
     nextWindowId: 1,
     nextMessageId: 1,
     wallpaper: 'day',
-    photosTaken: 0,
+    school: 0,
+    homeworkDone: [],
     ending: null,
     toasts: [],
+    thought: null,
+    sleepPrompt: false,
     muted: false,
     effects: true,
     startOpen: false,
@@ -144,6 +164,8 @@ function load(): GameState {
         phase: s.phase === 'ending' ? 'ending' : 'boot',
         windows: [],
         toasts: [],
+        thought: null,
+        sleepPrompt: false,
         renTyping: false,
         mayuTyping: false,
         activeConversation: null,
@@ -159,9 +181,11 @@ function load(): GameState {
 
 function persist() {
   try {
-    const { windows: _w, toasts: _t, ...rest } = state;
+    const { windows: _w, toasts: _t, thought: _th, sleepPrompt: _sp, ...rest } = state;
     void _w;
     void _t;
+    void _th;
+    void _sp;
     localStorage.setItem(SAVE_KEY, JSON.stringify(rest));
   } catch {
     /* ignore */
@@ -212,6 +236,11 @@ export function isNight(s: GameState) {
   return m >= 23 * 60 + 30 || m < 6 * 60 || m >= 24 * 60;
 }
 
+/** afternoon (before Mayu & co. come online) */
+export function isAfternoon(s: GameState) {
+  return s.clock < CONFIG.eveningMinutes;
+}
+
 export function stage(s: GameState): 0 | 1 | 2 | 3 {
   // 0 = cosy start, 1 = ren appears, 2 = dependence, 3 = late
   const score = s.day + s.ren / 5;
@@ -222,10 +251,32 @@ export function stage(s: GameState): 0 | 1 | 2 | 3 {
 }
 
 let toastId = 1;
-export function toast(title: string, text: string, icon?: string) {
+export function toast(title: string, text: string, icon?: string, action?: ToastAction) {
   const id = toastId++;
-  setState((s) => ({ toasts: [...s.toasts, { id, title, text, icon }] }));
-  setTimeout(() => setState((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 6000);
+  const same = (t: Toast) => t.title === title && JSON.stringify(t.action ?? null) === JSON.stringify(action ?? null);
+  setState((s) => ({ toasts: [...s.toasts.filter((t) => !same(t)).slice(-3), { id, title, text, icon, action }] }));
+  setTimeout(() => dismissToast(id), 7000);
+}
+
+export function dismissToast(id: number) {
+  setState((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }));
+}
+
+let thoughtId = 1;
+let thoughtTimer: ReturnType<typeof setTimeout> | null = null;
+/** Nana's inner voice — a handwritten line in the corner of the screen */
+export function think(text: string, ms = 6500) {
+  const id = thoughtId++;
+  if (thoughtTimer) clearTimeout(thoughtTimer);
+  setState({ thought: { id, text } });
+  thoughtTimer = setTimeout(() => setState((s) => (s.thought?.id === id ? { thought: null } : {})), ms);
+}
+
+/** run once per flag: returns true the first time */
+export function once(flag: string) {
+  if (state.flags[flag]) return false;
+  setFlag(flag);
+  return true;
 }
 
 export function setFlag(flag: string, value = true) {

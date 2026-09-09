@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { setState, useGameState, type AppId } from '../state/store';
 import { APP_META, openWindow } from '../state/windows';
-import { goToSleep } from '../story/engine';
 import { avatar } from '../story/avatars';
 import { playSound } from './sounds';
 
-const APPS: AppId[] = ['meromero', 'messenger', 'explorer', 'notepad', 'photos', 'music', 'camera', 'paint', 'personalize'];
+const APPS: AppId[] = ['meromero', 'homework', 'explorer', 'notepad', 'photos', 'music', 'paint', 'personalize'];
 
 export function StartMenu() {
   const s = useGameState();
@@ -79,12 +78,11 @@ export function StartMenu() {
           <button
             onClick={() => {
               playSound('click');
-              setState({ startOpen: false });
-              goToSleep(false);
+              setState({ startOpen: false, sleepPrompt: true });
             }}
-            title="Выключить компьютер и лечь спать"
+            title="Выключить компьютер и лечь спать — день закончится"
           >
-            Завершение работы ▸
+            Спать ▸
           </button>
         </div>
       </div>

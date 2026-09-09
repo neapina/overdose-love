@@ -65,7 +65,6 @@ export function postOptions(s: GameState): PostOption[] {
   list.push({ text: 'после дождя красиво', photo: 'sky_1', flags: ['posted_sky'], when: (x) => !x.flags.posted_sky });
   list.push({ text: 'моя комната. не смотрите на бардак', photo: 'room_1', flags: ['posted_room'], when: (x) => !x.flags.posted_room });
   list.push({ text: 'город вечером. с моста', photo: 'city_1', flags: ['posted_city'], when: (x) => !x.flags.posted_city && x.day >= 2 });
-  if (s.photosTaken > 0) list.push({ text: 'я', photo: `webcam_${s.photosTaken}`, flags: ['posted_selfie'], ren: 1, when: (x) => !x.flags.posted_selfie });
   if (s.flags.photo_cafe) list.push({ text: 'блинчики были огромные. маю права', flags: ['posted_cafe'], mayu: 1, when: (x) => !x.flags.posted_cafe });
   if (st >= 1) list.push({ text: 'кто-нибудь ещё не спит?', flags: ['posted_awake'], ren: 1, when: (x) => !x.flags.posted_awake });
   if (st >= 2) list.push({ text: 'ночью интернет как будто только твой', flags: ['posted_night'], ren: 2, when: (x) => !x.flags.posted_night });

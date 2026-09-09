@@ -3,7 +3,7 @@ import { stage, useGameState } from './state/store';
 import { Boot } from './os/Boot';
 import { Login } from './os/Login';
 import { Desktop } from './os/Desktop';
-import { Ending, Sleep } from './os/Screens';
+import { Ending, Interlude, Sleep } from './os/Screens';
 import { unlockAudio } from './os/sounds';
 
 export default function App() {
@@ -26,6 +26,7 @@ export default function App() {
       {s.phase === 'login' && <Login />}
       {s.phase === 'desktop' && <Desktop />}
       {s.phase === 'sleep' && <Sleep />}
+      {s.phase === 'interlude' && <Interlude />}
       {s.phase === 'ending' && <Ending />}
       {s.effects && (
         <>
