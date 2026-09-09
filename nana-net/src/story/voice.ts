@@ -31,8 +31,9 @@ export function appOpenedThought(app: AppId, s: GameState): string | null {
 export function idleThought(s: GameState): string {
   const st = stage(s);
   const night = isNight(s);
-  const pool =
-    st >= 3
+  const pool = !s.flags.mm_registered
+    ? ['маю: «зарегайся на meromero». ладно, ладно.', 'значок meromero смотрит на меня. я — на него.', 'ник придумать. аватарку выбрать. пять минут. а я сижу.', 'без страницы мне никто не напишет. это плюс. или минус.']
+    : st >= 3
       ? ['курсор мигает. я тоже.', 'обновить. обновить. обновить.', 'сколько сейчас? неважно.', 'в комнате холодно. не вставать.']
       : st === 2
         ? night

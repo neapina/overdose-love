@@ -14,6 +14,7 @@ const HW_TOAST = (s: GameState) => ({
   icon: '/assets/mm/book.png',
   action: { app: 'homework' as const },
 });
+const REG_TOAST = { title: 'meromero', text: 'Создай страницу — Маю найдёт тебя по нику.', icon: '/assets/icons/meromero.png', action: { app: 'meromero' as const } };
 const SLEEP_TOAST = { title: 'Seven', text: 'Закончить день: Пуск → Спать', icon: '/assets/mm/moon.png' };
 
 /**
@@ -47,11 +48,25 @@ export function dayHints(s: GameState, remaining: number): Hint | null {
     hwLeft && c >= 17 * 60 + 10 && c < CONFIG.eveningMinutes
       ? { flag: `hint_hw_d${d}`, text: st >= 2 ? 'домашка. какая домашка.' : 'домашка. лучше сейчас, пока голова работает.', toast: HW_TOAST(s) }
       : null,
-    d === 1 && !s.flags.mm_registered && c >= 18 * 60 + 20
+    !s.flags.mm_registered && !hwLeft && c >= CONFIG.dayStartMinutes + 5
       ? {
-          flag: 'hint_register',
-          text: 'маю спросит, зарегалась ли я. лучше сделать сейчас, чтобы она не пилила.',
-          toast: { title: 'meromero', text: 'Создай страницу — Маю найдёт тебя по нику.', icon: '/assets/icons/meromero.png', action: { app: 'meromero' } },
+          flag: `hint_register_hw_d${d}`,
+          text: d === 1 ? 'уроки — всё. теперь meromero. маю сказала «сегодня», а её «сегодня» — это приказ.' : 'уроки — всё. meromero так и не сделала. маю сегодня смотрела с укором.',
+          toast: REG_TOAST,
+        }
+      : null,
+    !s.flags.mm_registered && c >= 18 * 60 + 20
+      ? {
+          flag: `hint_register_d${d}`,
+          text: d === 1 ? 'маю спросит, зарегалась ли я. лучше сделать сейчас, чтобы она не пилила.' : 'маю опять про meromero. ладно. пять минут, честно.',
+          toast: REG_TOAST,
+        }
+      : null,
+    !s.flags.mm_registered && c >= 21 * 60
+      ? {
+          flag: `hint_register_late_d${d}`,
+          text: 'все уже в сети, а у меня даже страницы нет. значок meromero — на рабочем столе.',
+          toast: REG_TOAST,
         }
       : null,
     d >= 2 && c >= CONFIG.eveningMinutes && c < CONFIG.eveningMinutes + 30

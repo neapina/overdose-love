@@ -39,8 +39,8 @@ export function Login() {
 
   // the note on the monitor never spells the whole word; after a few tries it fills in
   const pw = CONFIG.password;
-  const masked = tries >= 3 ? pw : tries >= 2 ? pw.slice(0, 3) + '_'.repeat(pw.length - 3) : pw[0] + '_'.repeat(pw.length - 2) + pw[pw.length - 1];
-  const note = day === 1 ? ['пароль: ' + masked + ' ✿', '(любимый цветок. латиницей!)', '', 'маю: зарегаться на meromero!!'] : stage >= 3 ? ['пароль: ' + masked, '', 'не спать. не спать. не спать.'] : stage >= 2 ? ['пароль: ' + masked + ' ✿', '', 'он пишет после 22:30'] : ['пароль: ' + masked + ' ✿', '', 'маю: ответить!!', 'домашка!!'];
+  const masked = tries >= 3 ? pw : tries >= 2 ? pw.slice(0, 3) + '·'.repeat(pw.length - 3) : pw[0] + '·'.repeat(pw.length - 2) + pw[pw.length - 1];
+  const note = day === 1 ? ['(любимый цветок, латиницей, 6 букв)', '', 'маю: зарегаться на meromero!!'] : stage >= 3 ? ['', 'не спать. не спать. не спать.'] : stage >= 2 ? ['', 'он пишет после 22:30'] : ['', 'маю: ответить!!', 'домашка!!'];
 
   if (welcome) {
     return (
@@ -80,6 +80,13 @@ export function Login() {
         {err ? <div className="login-error">{err}</div> : <div className="login-hint">{day > 1 ? `день ${day} · ${formatClock(clock)} · с возвращением` : 'Единственная учётная запись на этом компьютере'}</div>}
       </form>
       <div className={`sticky ${stage >= 2 ? 'dark' : ''}`} aria-label="записка на мониторе" title="записка на мониторе">
+        <div>
+          пароль:
+          <span className="sticky-pw" aria-label={`пароль: ${masked}`}>
+            {masked}
+          </span>
+          {stage < 3 && ' ✿'}
+        </div>
         {note.map((l, i) => (
           <div key={i}>{l || '\u00a0'}</div>
         ))}

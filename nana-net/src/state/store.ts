@@ -89,7 +89,7 @@ export interface GameState {
   homeworkDone: string[];
   ending: string | null;
   toasts: Toast[];
-  thought: { id: number; text: string } | null;
+  thought: { id: number; text: string; ms: number } | null;
   sleepPrompt: boolean;
   muted: boolean;
   effects: boolean;
@@ -268,7 +268,7 @@ let thoughtTimer: ReturnType<typeof setTimeout> | null = null;
 export function think(text: string, ms = 6500) {
   const id = thoughtId++;
   if (thoughtTimer) clearTimeout(thoughtTimer);
-  setState({ thought: { id, text } });
+  setState({ thought: { id, text, ms } });
   thoughtTimer = setTimeout(() => setState((s) => (s.thought?.id === id ? { thought: null } : {})), ms);
 }
 

@@ -31,9 +31,10 @@ export function Taskbar() {
         <div className="task pinned clickable" role="button" title="Проводник" onClick={() => openWindow('explorer')}>
           <img src="/assets/icons/folder-documents.png" alt="" />
         </div>
-        <div className="task pinned clickable" role="button" title="meromero" onClick={() => openWindow('meromero', unread ? { page: 'messages', contact: s.unread.ren > 0 ? 'ren' : 'mayu' } : undefined)}>
+        <div className="task pinned clickable" role="button" title={s.flags.mm_registered ? 'meromero' : 'meromero · создать страницу'} onClick={() => openWindow('meromero', unread ? { page: 'messages', contact: s.unread.ren > 0 ? 'ren' : 'mayu' } : undefined)}>
           <img src="/assets/icons/meromero.png" alt="" />
           {unread > 0 && <span className="badge">{unread}</span>}
+          {!s.flags.mm_registered && <span className="badge soft">!</span>}
         </div>
         <div className="task pinned clickable" role="button" title={hwLeft ? `Уроки · осталось ${hwLeft}` : 'Уроки'} onClick={() => openWindow('homework')}>
           <img src="/assets/mm/book.png" alt="" />

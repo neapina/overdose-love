@@ -46,7 +46,7 @@ export function Thought() {
   const thought = useGame((s) => s.thought);
   if (!thought) return null;
   return (
-    <div className="thought" key={thought.id}>
+    <div className="thought" key={thought.id} style={{ animationDelay: `0s, ${Math.max(0, thought.ms - 1000) / 1000}s` }}>
       {thought.text}
     </div>
   );
