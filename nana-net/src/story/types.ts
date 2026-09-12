@@ -1,4 +1,4 @@
-import type { GameState, Contact } from '../state/store';
+import type { GameState, Contact, ToastAction } from '../state/store';
 
 export type Speaker = Contact | 'nana' | 'system';
 
@@ -18,7 +18,7 @@ export type Step =
   | { type: 'set'; flags?: string[]; ren?: number; mayu?: number }
   | { type: 'status'; contact: Contact; online: boolean }
   | { type: 'pause'; ms: number }
-  | { type: 'toast'; title: string; text: string; icon?: string }
+  | { type: 'toast'; title: string; text: string; icon?: string; action?: ToastAction }
   /** Nana's inner voice */
   | { type: 'think'; text: string }
   /** comment on Nana's latest post */

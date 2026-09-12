@@ -167,7 +167,7 @@ export function homeworkLeft(s: GameState) {
 export function testVerdict(correct: number, total: number, s: GameState) {
   const st = stage(s);
   const ratio = correct / total;
-  if (ratio === 1) return st >= 2 ? 'всё правильно. руки помнят. голова где-то ещё.' : 'всё правильно. маю бы сказала «зубрилка».';
-  if (ratio >= 0.6) return st >= 2 ? 'сойдёт. всё равно завтра никто не проверит.' : 'нормально. сойдёт.';
-  return st >= 2 ? 'плохо. неважно.' : 'плохо. надо было читать, а не сидеть в сети.';
+  if (ratio === 1) return st >= 2 ? 'всё верно. на автомате как-то' : 'всё верно. маю бы сказала «зубрилка»';
+  if (ratio >= 0.6) return st >= 2 ? 'сойдёт. всё равно' : 'ну норм. сойдёт';
+  return st >= 2 ? 'плохо. пофиг' : 'плохо. надо было читать, а не сидеть в сети до двух';
 }

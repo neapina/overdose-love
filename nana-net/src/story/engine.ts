@@ -127,7 +127,7 @@ function runNext() {
       schedule(step.ms, runNext);
       break;
     case 'toast':
-      toast(step.title, step.text, step.icon);
+      toast(step.title, step.text, step.icon, step.action ?? (step.title.startsWith('meromero') ? chatTarget(conv.contact) : undefined));
       playSound('notify');
       schedule(800, runNext);
       break;

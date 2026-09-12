@@ -1,13 +1,22 @@
+@import url('/fonts/fonts.css');
+
 :root {
-  --font: 'Segoe UI', 'Noto Sans', 'Meiryo', 'Yu Gothic UI', system-ui, sans-serif;
-  --aero-tint: rgba(150, 190, 230, 0.55);
-  --aero-border: rgba(255, 255, 255, 0.7);
-  --aero-dark: #2c4a6e;
-  --pink: #f0a6c4;
+  --font: 'M PLUS 1p', 'Segoe UI', 'Noto Sans', 'Meiryo', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', 'Consolas', 'DejaVu Sans Mono', monospace;
+  --pixel: 'DotGothic16', 'M PLUS 1p', monospace;
+  --aero-tint: rgba(26, 30, 48, 0.72);
+  --aero-border: rgba(170, 190, 230, 0.28);
+  --aero-dark: #10141f;
+  --pink: #f2a7c3;
   --pink-deep: #d9578f;
-  --blue: #6fb0e8;
+  --blue: #7fb6e8;
+  --cyan: #7fe0ff;
+  --amber: #ffbf69;
   --grey: #8a96a6;
-  --text: #1c2733;
+  --paper: #f3efe6;
+  --paper-2: #e9e4d8;
+  --ink: #2b2a33;
+  --text: #2b2a33;
   --taskbar-h: 40px;
 }
 
@@ -344,21 +353,7 @@ img {
 }
 
 .desktop.wp-day {
-  background:
-    radial-gradient(ellipse at 70% 15%, rgba(255, 255, 255, 0.35), transparent 45%),
-    radial-gradient(ellipse at 15% 95%, rgba(235, 140, 180, 0.55), transparent 55%),
-    radial-gradient(ellipse at 90% 80%, rgba(110, 170, 240, 0.6), transparent 50%),
-    linear-gradient(180deg, #4f8fd0 0%, #86b9e6 45%, #c9a6c6 100%);
-}
-
-.desktop.wp-day::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.6) 1px, transparent 2px);
-  background-size: 90px 90px;
-  opacity: 0.4;
-  pointer-events: none;
+  background-image: url('/assets/wallpaper-dusk.jpg');
 }
 
 .desktop.wp-dusk {

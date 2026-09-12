@@ -37,10 +37,12 @@ export default function App() {
         {s.phase === 'ending' && <Ending />}
         {s.effects && (
           <>
+            <div className="fx-layer fx-tint" />
             <div className="fx-layer fx-scanlines" />
-            <div className="fx-layer fx-noise" style={{ opacity: 0.05 + st * 0.03 }} />
+            <div className="fx-layer fx-noise" style={{ opacity: 0.07 + st * 0.03 }} />
+            <div className="fx-layer fx-tracking" />
             <div className="fx-layer fx-vignette" />
-            <div className="fx-layer fx-dim" style={{ opacity: 0.3 + st * 0.25 }} />
+            <div className="fx-layer fx-dim" style={{ opacity: 0.25 + st * 0.22 }} />
             {st >= 2 && <div className="fx-layer fx-flicker" />}
           </>
         )}

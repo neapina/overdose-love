@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { isNight, setState, useGameState } from '../state/store';
+import { formatClock, isNight, setState, stage, useGameState, type GameState } from '../state/store';
+import { homeworkFor } from '../story/school';
 import { buildFs } from '../story/fs';
 import { noteInteraction, startEngine, stopEngine } from '../story/engine';
 import { openNode } from './open';
@@ -35,6 +36,7 @@ export function Desktop() {
         }
       }}
     >
+      <Gadgets s={s} />
       <div className="icons">
         {desktopItems.map((n) => (
           <div
@@ -65,6 +67,38 @@ export function Desktop() {
       <Toasts />
       <Thought />
       <Taskbar />
+    </div>
+  );
+}
+
+/** Windows 7 desktop gadgets: a clock and Nana's own sticky notes — this is where the day's to-do lives */
+function Gadgets({ s }: { s: GameState }) {
+  const st = stage(s);
+  const hw = homeworkFor(s);
+  const hwDone = hw.every((t) => s.homeworkDone.includes(t.id));
+  const pink = !s.flags.mm_registered
+    ? 'meromero — зарегаться!!\n(маю пилит)'
+    : st >= 3
+      ? 'не спать\nне спать\nне спать'
+      : st >= 2
+        ? '22:30\n\nобои → ночь'
+        : s.day === 1
+          ? s.flags.mayu_friend
+            ? 'статус. песня. пост\n(маю)'
+            : 'маю ✌ найти в meromero'
+          : 'ответить маю\nфотки → папка';
+  return (
+    <div className="gadgets" aria-hidden>
+      <div className="gadget-clock">
+        {formatClock(s.clock)}
+        <small>{['чт', 'пт', 'сб', 'вс', 'пн', 'вт', 'ср'][(s.day - 1) % 7]} · {12 + s.day}.10.2011</small>
+      </div>
+      {hw.length > 0 && (
+        <div className={`gadget-note ${hwDone ? 'done' : ''}`}>
+          {hw.map((t) => `${t.subject.toLowerCase()} — ${t.title.toLowerCase()}`).join('\n')}
+        </div>
+      )}
+      <div className={`gadget-note ${st >= 2 ? 'blue' : 'pink'}`}>{pink}</div>
     </div>
   );
 }

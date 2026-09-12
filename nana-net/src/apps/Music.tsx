@@ -34,11 +34,11 @@ export function Music({ win }: { win: WindowState }) {
     const t = setInterval(() => setPos(Math.floor(a.currentTime)), 500);
     if (isRen) {
       setState((stt) => (stt.flags.listened_ren_song ? {} : { flags: { ...stt.flags, listened_ren_song: true }, ren: stt.ren + 1 }));
-      setTimeout(() => think(s.flags.listened_ren_song ? 'опять её. на повторе. как он.' : 'без слов. медленно. как будто кто-то ходит по пустой квартире. это он и есть.'), 4000);
+      setTimeout(() => think(s.flags.listened_ren_song ? 'опять её. ну и пусть' : 'без слов. медленная. запись шумит, как будто на телефон в пустой комнате'), 4000);
     } else if (!s.flags[`heard_${idx}`]) {
       setState((stt) => ({ flags: { ...stt.flags, [`heard_${idx}`]: true } }));
-      const lines = ['эту мы с маю слушали всё лето. в наушниках на двоих.', 'дождь. демка без автора. нашла где-то на форуме.', 'дорога домой. она правда звучит как дорога домой.', 'sleepless. название честнее меня.'];
-      setTimeout(() => think(st >= 2 && idx === 3 ? 'sleepless. теперь это не название.' : lines[idx] ?? ''), 3500);
+      const lines = ['эту мы с маю всё лето гоняли. одни наушники на двоих', 'демка с форума. кто автор — так и не нашла', 'под неё хорошо идти от станции. в октябре особенно', 'sleepless. ну да'];
+      setTimeout(() => think(st >= 2 && idx === 3 ? 'sleepless. смешно уже не очень' : lines[idx] ?? ''), 3500);
     }
     return () => {
       clearInterval(t);

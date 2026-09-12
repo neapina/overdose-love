@@ -3,6 +3,8 @@ import { isAfternoon, setState, stage, think, toast, useGameState } from '../sta
 import { homeworkFor, testVerdict, type HomeworkTask } from '../story/school';
 import { playSound } from '../os/sounds';
 
+const WEEKDAY = ['чт', 'пт', 'сб', 'вс', 'пн', 'вт', 'ср'];
+
 export function Homework() {
   const s = useGameState();
   const tasks = homeworkFor(s);
@@ -20,12 +22,14 @@ export function Homework() {
       <div className="hw-head">
         <img src="/assets/mm/book.png" alt="" />
         <div>
-          <b>Дневник · день {s.day}</b>
+          <b>
+            дневник · {WEEKDAY[(s.day - 1) % 7]} {12 + s.day}.10
+          </b>
           <div className="hw-sub">
-            {tasks.length === 0 ? (st >= 2 ? 'заданий нет. или я их не записала.' : 'на завтра ничего не задали.') : left.length === 0 ? 'всё сделано ✓' : `осталось: ${left.length} из ${tasks.length}`}
+            {tasks.length === 0 ? (st >= 2 ? 'ничего не записано. или не задали' : 'на завтра ничего') : left.length === 0 ? 'всё' : 'на завтра'}
           </div>
         </div>
-        <div className="hw-score" title="как идёт учёба">
+        <div className="hw-score" title="оценки за неделю">
           {s.school >= 8 ? 'A' : s.school >= 5 ? 'B' : s.school >= 2 ? 'C' : s.day === 1 ? '—' : 'D'}
         </div>
       </div>
@@ -34,20 +38,20 @@ export function Homework() {
           const done = s.homeworkDone.includes(t.id);
           return (
             <div key={t.id} className={`hw-item ${done ? 'done' : 'clickable'}`} role={done ? undefined : 'button'} onClick={() => !done && (playSound('click'), setOpenId(t.id))}>
-              <img src={done ? '/assets/mm/check-on.png' : '/assets/mm/check-off.png'} alt="" />
+              <span className="hw-box">{done ? '✓' : ''}</span>
               <div style={{ flex: 1 }}>
-                <b>{t.subject}</b> — {t.title}
+                <b>{t.subject.toLowerCase()}</b> — {t.title}
                 <div className="hw-sub">{t.due}</div>
               </div>
-              <span className="hw-kind">{t.kind === 'test' ? `тест · ${t.questions?.length ?? 0} вопр.` : 'эссе'}</span>
+              <span className="hw-kind">{t.kind === 'test' ? `тест, ${t.questions?.length ?? 0} вопр.` : 'эссе'}</span>
             </div>
           );
         })}
       </div>
       <div className="hw-foot">
-        {!isAfternoon(s) && left.length > 0 && <span>уже вечер. {st >= 2 ? 'голова не здесь.' : 'ну можно и сейчас.'}</span>}
-        {isAfternoon(s) && left.length > 0 && <span>лучше до вечера — потом все выйдут в сеть.</span>}
-        {left.length === 0 && tasks.length > 0 && <span>{st >= 2 ? 'сделано. можно не думать.' : 'сделано. вечер свободен.'}</span>}
+        {!isAfternoon(s) && left.length > 0 && <span>{st >= 2 ? 'поздно уже. голова не тут' : 'вечер уже. ну ладно, быстро'}</span>}
+        {isAfternoon(s) && left.length > 0 && <span>пока все в школе / на кружках — тишина. самое время</span>}
+        {left.length === 0 && tasks.length > 0 && <span>{st >= 2 ? 'всё. можно не думать' : 'всё. вечер мой'}</span>}
       </div>
     </div>
   );
@@ -73,26 +77,26 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
     }));
     setFinished(true);
     if (task.kind === 'test') think(testVerdict(score, total, s));
-    else think(st >= 2 ? 'написала. половина — не про то, о чём спрашивали.' : 'написала. учительница любит слово «ordinary». я — нет.');
-    toast('Уроки', `${task.subject}: ${task.kind === 'test' ? `${score}/${total}` : 'эссе сдано'}`, '/assets/mm/book.png', { app: 'homework' });
+    else think(st >= 2 ? 'написала. половина вообще не про то. ну и ладно' : 'написала. танака-сенсей обожает слово ordinary. я не очень');
+    toast('уроки', `${task.subject.toLowerCase()} — ${task.kind === 'test' ? `${score}/${total}` : 'эссе готово'}`, '/assets/mm/book.png', { app: 'homework' });
   }
 
   if (finished) {
     return (
       <div className="hw">
         <div className="hw-head">
-          <img src="/assets/mm/check-on.png" alt="" />
+          <img src="/assets/mm/book.png" alt="" />
           <div>
             <b>
-              {task.subject} — {task.title}
+              {task.subject.toLowerCase()} — {task.title}
             </b>
-            <div className="hw-sub">{task.kind === 'test' ? `результат: ${correct} из ${total}` : 'эссе сохранено в school/'}</div>
+            <div className="hw-sub">{task.kind === 'test' ? `${correct} из ${total}` : 'сохранила в school/'}</div>
           </div>
         </div>
         <div className="hw-body center">
-          <div className="hw-result">{task.kind === 'test' ? `${correct} / ${total}` : '✓'}</div>
-          <button className="btn primary" onClick={() => (playSound('click'), onDone())}>
-            К списку заданий
+          <div className="hw-result">{task.kind === 'test' ? `${correct} / ${total}` : 'готово'}</div>
+          <button className="btn" onClick={() => (playSound('click'), onDone())}>
+            закрыть тетрадь
           </button>
         </div>
       </div>
@@ -108,14 +112,14 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
           <img src="/assets/mm/book.png" alt="" />
           <div>
             <b>
-              {task.subject} — {task.title}
+              {task.subject.toLowerCase()} — {task.title}
             </b>
             <div className="hw-sub">
-              вопрос {i + 1} из {total}
+              {i + 1} / {total}
             </div>
           </div>
           <button className="btn" onClick={() => (playSound('click'), onDone())}>
-            отложить
+            потом
           </button>
         </div>
         <div className="hw-body">
@@ -148,7 +152,7 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
                 }
               }}
             >
-              {i + 1 >= total ? 'Сдать' : 'Дальше →'}
+              {i + 1 >= total ? 'сдать' : 'дальше →'}
             </button>
           )}
         </div>
@@ -163,14 +167,14 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
         <img src="/assets/mm/book.png" alt="" />
         <div>
           <b>
-            {task.subject} — {task.title}
+            {task.subject.toLowerCase()} — {task.title}
           </b>
           <div className="hw-sub">
-            часть {i + 1} из {total}
+            абзац {i + 1} / {total}
           </div>
         </div>
         <button className="btn" onClick={() => (playSound('click'), onDone())}>
-          отложить
+          потом
         </button>
       </div>
       <div className="hw-body">

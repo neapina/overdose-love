@@ -33,14 +33,15 @@ export function Login() {
     setShake(true);
     setTimeout(() => setShake(false), 400);
     setTries((t) => t + 1);
-    setErr(tries >= 2 ? 'Неверный пароль. Записка справа: любимый цветок, латиницей, 6 букв.' : tries >= 1 ? 'Неверный пароль. На мониторе висит записка.' : 'Неверный пароль.');
+    setErr(tries >= 2 ? 'Неверный пароль. На записке: любимый цветок, латиницей, 6 букв.' : tries >= 1 ? 'Неверный пароль. Записка на мониторе.' : 'Неверный пароль.');
     setPass('');
   }
 
   // the note on the monitor never spells the whole word; after a few tries it fills in
   const pw = CONFIG.password;
   const masked = tries >= 3 ? pw : tries >= 2 ? pw.slice(0, 3) + '·'.repeat(pw.length - 3) : pw[0] + '·'.repeat(pw.length - 2) + pw[pw.length - 1];
-  const note = day === 1 ? ['(любимый цветок, латиницей, 6 букв)', '', 'маю: зарегаться на meromero!!'] : stage >= 3 ? ['', 'не спать. не спать. не спать.'] : stage >= 2 ? ['', 'он пишет после 22:30'] : ['', 'маю: ответить!!', 'домашка!!'];
+  const note = day === 1 ? ['(любимый цветок, латиницей, 6 букв)', '', 'маю: «ЗАРЕГАЙСЯ УЖЕ» ✌'] : stage >= 3 ? ['', 'не спать', 'не спать', 'не спать'] : stage >= 2 ? ['', 'после 22:30', '', ''] : ['', 'маю — ответить', 'англ — unit 7'];
+  const todo = day === 1 ? ['англ. unit 7 — тест', 'матем. стр. 41', 'молоко!!'] : stage >= 3 ? ['track07', 'track07', 'track07'] : stage >= 2 ? ['22:30', 'обои поменять', ''] : ['фотки маю → папка', 'история, параграф 12', 'спать до 1 (ха)'];
 
   if (welcome) {
     return (
@@ -93,6 +94,12 @@ export function Login() {
         <div className="sticky-doodle" aria-hidden>
           🌸
         </div>
+      </div>
+      <div className={`sticky-2 ${stage >= 2 ? 'dark' : ''}`} aria-hidden>
+        <b>{day === 1 ? '10.13' : `10.${12 + day}`}</b>
+        {todo.map((l, i) => (
+          <div key={i}>{l || '\u00a0'}</div>
+        ))}
       </div>
       <div className="login-footer">
         {CONFIG.osName}™ · {CONFIG.computerName}

@@ -1,7 +1,6 @@
 import { CONFIG } from '../config';
 import { stage, type GameState, type ToastAction } from '../state/store';
 import { homeworkFor } from './school';
-import { TOUCH } from '../os/viewport';
 
 export interface Hint {
   flag: string;
@@ -10,13 +9,17 @@ export interface Hint {
 }
 
 const HW_TOAST = (s: GameState) => ({
-  title: 'Уроки',
-  text: `Домашнее задание на ${s.day === 1 ? 'сегодня' : 'завтра'}: ${homeworkFor(s).length} задания`,
+  title: 'уроки',
+  text: homeworkFor(s)
+    .filter((t) => !s.homeworkDone.includes(t.id))
+    .map((t) => t.subject.toLowerCase())
+    .join(' · '),
   icon: '/assets/mm/book.png',
   action: { app: 'homework' as const },
 });
-const REG_TOAST = { title: 'meromero', text: 'Создай страницу — Маю найдёт тебя по нику.', icon: '/assets/icons/meromero.png', action: { app: 'meromero' as const } };
-const SLEEP_TOAST = { title: 'Seven', text: 'Закончить день: Пуск → Спать', icon: '/assets/mm/moon.png' };
+const REG_TOAST = { title: 'meromero', text: 'маю: «я тебя по нику найду!!»', icon: '/assets/icons/meromero.png', action: { app: 'meromero' as const } };
+// Nana's own reminder, set weeks ago in the scheduler and never turned off
+const SLEEP_TOAST = (text: string) => ({ title: 'напоминание', text, icon: '/assets/mm/moon.png' });
 
 /**
  * Nana's timed inner voice: returns the first hint that applies right now and hasn't been shown yet.
@@ -31,80 +34,74 @@ export function dayHints(s: GameState, remaining: number): Hint | null {
     d === 1 && c >= CONFIG.dayStartMinutes + 1
       ? {
           flag: 'hint_d1_start',
-          text: 'дома. маю на перемене сказала: «зарегайся на meromero сегодня, я тебя найду». и ещё домашка. ладно.',
-          toast: { title: 'Рабочий стол', text: TOUCH ? 'Нажми на значок — откроется программа. Пуск — внизу слева.' : 'Двойной клик по значку открывает программу. Пуск — внизу слева.', icon: '/assets/icons/computer.png' },
+          text: 'дома. сумку на кровать. маю на перемене опять: «зарегайся сегодня, я тебя найду». и англ до завтра.',
         }
       : null,
     d >= 2 && c >= CONFIG.dayStartMinutes + 1
       ? {
           flag: `hint_start_d${d}`,
-          text:
-            st >= 2
-              ? 'дома. на уроках смотрела в окно и думала о том, что он написал. домашка подождёт. или нет.'
-              : st === 1
-                ? 'дома. сначала уроки, потом meromero. ну или наоборот.'
-                : 'дома. до вечера — уроки. вечером все выползут в сеть.',
+          text: st >= 2 ? 'дома. весь день в окно смотрела. не про уроки думала.' : st === 1 ? 'дома. в наушниках всю дорогу. сначала уроки, наверное. или нет.' : 'дома. тихо. мама до девяти. в сети всё равно ещё никого.',
         }
       : null,
     hwLeft && c >= 17 * 60 + 10 && c < CONFIG.eveningMinutes
-      ? { flag: `hint_hw_d${d}`, text: st >= 2 ? 'домашка. какая домашка.' : 'домашка. лучше сейчас, пока голова работает.', toast: HW_TOAST(s) }
+      ? { flag: `hint_hw_d${d}`, text: st >= 2 ? 'домашка. слово как из прошлого года.' : 'уроки. пока голова хоть что-то соображает.', toast: HW_TOAST(s) }
       : null,
     !s.flags.mm_registered && !hwLeft && c >= CONFIG.dayStartMinutes + 5
       ? {
           flag: `hint_register_hw_d${d}`,
-          text: d === 1 ? 'уроки — всё. теперь meromero. маю сказала «сегодня», а её «сегодня» — это приказ.' : 'уроки — всё. meromero так и не сделала. маю сегодня смотрела с укором.',
+          text: d === 1 ? 'всё. теперь meromero, пока маю не начала звонить.' : 'уроки всё. страницу так и не сделала. маю сегодня так посмотрела.',
           toast: REG_TOAST,
         }
       : null,
     !s.flags.mm_registered && c >= 18 * 60 + 20
       ? {
           flag: `hint_register_d${d}`,
-          text: d === 1 ? 'маю спросит, зарегалась ли я. лучше сделать сейчас, чтобы она не пилила.' : 'маю опять про meromero. ладно. пять минут, честно.',
+          text: d === 1 ? 'маю спросит. сто процентов спросит.' : 'маю опять про meromero. ок. пять минут.',
           toast: REG_TOAST,
         }
       : null,
     !s.flags.mm_registered && c >= 21 * 60
       ? {
           flag: `hint_register_late_d${d}`,
-          text: 'все уже в сети, а у меня даже страницы нет. значок meromero — на рабочем столе.',
+          text: 'все уже там сидят. а у меня даже страницы нет.',
           toast: REG_TOAST,
         }
       : null,
     d >= 2 && c >= CONFIG.eveningMinutes && c < CONFIG.eveningMinutes + 30
       ? {
           flag: `hint_eve_d${d}`,
-          text: st >= 2 ? 'вечер. он обычно появляется позже. ещё рано смотреть. я смотрю.' : 'вечер. сейчас все выползают в сеть.',
+          text: st >= 2 ? 'вечер. он появляется позже. рано ещё смотреть. смотрю.' : 'вечер. сейчас все выползают.',
         }
       : null,
     hwLeft && c >= 21 * 60 && c < 23 * 60
-      ? { flag: `hint_hw_late_d${d}`, text: st >= 2 ? 'домашку не сделала. ну и что.' : 'домашку так и не сделала. завтра будет весело.' }
+      ? { flag: `hint_hw_late_d${d}`, text: st >= 2 ? 'домашку не сделала. и ладно.' : 'учебник так и лежит. завтра будет весело.' }
       : null,
     remaining === 0 && c >= 23 * 60 && c < 24 * 60
       ? {
           flag: `hint_done_d${d}`,
-          text: st >= 2 ? 'все разошлись. кроме него, наверное. ещё чуть-чуть.' : 'на сегодня, кажется, всё. можно лечь — Пуск → Спать.',
-          toast: st >= 2 ? undefined : SLEEP_TOAST,
+          text: st >= 2 ? 'все разошлись. кроме него, наверное.' : 'вроде всё. глаза щиплет.',
+          toast: st >= 2 ? undefined : SLEEP_TOAST('спать до 1!!! (ты сама написала)'),
         }
       : null,
     c >= 24 * 60 + 40 && c < 26 * 60
       ? {
           flag: `hint_midnight_d${d}`,
-          text: st >= 2 ? 'за полночь. он ещё online. ещё немного.' : 'за полночь. завтра в школу. глаза уже щиплет.',
-          toast: st >= 2 ? undefined : SLEEP_TOAST,
+          text: st >= 2 ? 'за полночь. он ещё online.' : 'за полночь. в школу к восьми. ну и что.',
+          toast: st >= 2 ? undefined : SLEEP_TOAST('спать до 1!!! (ты сама написала)'),
         }
       : null,
     c >= 26 * 60 && c < 27 * 60 + 30
       ? {
           flag: `hint_two_d${d}`,
-          text: st >= 2 ? 'два часа. в комнате только свет монитора. мне нравится.' : 'два часа ночи. пуск → спать. или ещё чуть-чуть.',
-          toast: SLEEP_TOAST,
+          text: st >= 2 ? 'два. в комнате только монитор светится. нормально.' : 'два часа. пуск, спать. или ещё одну песню.',
+          toast: SLEEP_TOAST('СПАТЬ. серьёзно.'),
         }
       : null,
     c >= 27 * 60 + 30
       ? {
           flag: `hint_pass_d${d}`,
-          text: 'если не лечь сейчас — усну прямо здесь.',
-          toast: { title: 'Seven', text: 'Монитор погаснет сам в 04:10.', icon: '/assets/mm/moon.png' },
+          text: 'если сейчас не лечь — усну прямо тут.',
+          toast: SLEEP_TOAST('04:10 — всё, монитор выключится'),
         }
       : null,
   ];
