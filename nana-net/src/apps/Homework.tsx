@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { isAfternoon, setState, stage, think, toast, useGameState } from '../state/store';
 import { homeworkFor, testVerdict, type HomeworkTask } from '../story/school';
 import { playSound } from '../os/sounds';
+import { px } from '../os/pixel';
 
 const WEEKDAY = ['чт', 'пт', 'сб', 'вс', 'пн', 'вт', 'ср'];
 
@@ -20,7 +21,7 @@ export function Homework() {
   return (
     <div className="hw">
       <div className="hw-head">
-        <img src="/assets/mm/book.png" alt="" />
+        <img src={px('/assets/mm/book.png')} alt="" />
         <div>
           <b>
             дневник · {WEEKDAY[(s.day - 1) % 7]} {12 + s.day}.10
@@ -85,7 +86,7 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
     return (
       <div className="hw">
         <div className="hw-head">
-          <img src="/assets/mm/book.png" alt="" />
+          <img src={px('/assets/mm/book.png')} alt="" />
           <div>
             <b>
               {task.subject.toLowerCase()} — {task.title}
@@ -109,7 +110,7 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
     return (
       <div className="hw">
         <div className="hw-head">
-          <img src="/assets/mm/book.png" alt="" />
+          <img src={px('/assets/mm/book.png')} alt="" />
           <div>
             <b>
               {task.subject.toLowerCase()} — {task.title}
@@ -164,7 +165,7 @@ function TaskView({ task, onDone }: { task: HomeworkTask; onDone: () => void }) 
   return (
     <div className="hw">
       <div className="hw-head">
-        <img src="/assets/mm/book.png" alt="" />
+        <img src={px('/assets/mm/book.png')} alt="" />
         <div>
           <b>
             {task.subject.toLowerCase()} — {task.title}

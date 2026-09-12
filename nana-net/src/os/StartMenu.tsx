@@ -3,6 +3,7 @@ import { setState, useGameState, type AppId } from '../state/store';
 import { APP_META, openWindow } from '../state/windows';
 import { avatar } from '../story/avatars';
 import { playSound } from './sounds';
+import { px } from './pixel';
 
 const APPS: AppId[] = ['meromero', 'homework', 'explorer', 'notepad', 'photos', 'music', 'paint', 'personalize'];
 
@@ -43,7 +44,7 @@ export function StartMenu() {
         <div className="sm-apps">
           {apps.map((a) => (
             <div key={a} className="sm-app clickable" role="button" onClick={() => open(a)}>
-              <img src={APP_META[a].icon} alt="" />
+              <img src={px(APP_META[a].icon)} alt="" />
               {APP_META[a].title}
             </div>
           ))}

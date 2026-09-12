@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { dismissToast, useGame } from '../state/store';
 import { openWindow } from '../state/windows';
 import { playSound } from './sounds';
+import { px } from './pixel';
 
 export function Toasts() {
   const toasts = useGame((s) => s.toasts);
@@ -20,7 +21,7 @@ export function Toasts() {
             dismissToast(t.id);
           }}
         >
-          <img src={t.icon ?? '/assets/mm/notif-bell.png'} alt="" />
+          <img src={px(t.icon ?? '/assets/mm/notif-bell.png')} alt="" />
           <div>
             <b>{t.title}</b>
             <span>{t.text}</span>

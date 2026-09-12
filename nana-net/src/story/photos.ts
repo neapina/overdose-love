@@ -70,7 +70,7 @@ export function renderPhoto(id: string, w = 320, h = 240): string {
   const hit = cache.get(key);
   if (hit) return hit;
   const def = photoDef(id);
-  const lowW = 128;
+  const lowW = 96;
   const lowH = Math.round((lowW * h) / w);
   const c = document.createElement('canvas');
   c.width = lowW;
@@ -83,13 +83,9 @@ export function renderPhoto(id: string, w = 320, h = 240): string {
   out.width = w;
   out.height = h;
   const octx = out.getContext('2d')!;
-  octx.imageSmoothingEnabled = true;
+  octx.imageSmoothingEnabled = false;
   octx.drawImage(c, 0, 0, w, h);
-  // slight blur pass via re-scaling
-  octx.globalAlpha = 0.35;
-  octx.drawImage(c, 1, 0, w, h);
-  octx.globalAlpha = 1;
-  const url = out.toDataURL('image/jpeg', 0.55);
+  const url = out.toDataURL('image/png');
   cache.set(key, url);
   return url;
 }

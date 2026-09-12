@@ -2,6 +2,7 @@ import { useRef, type ReactNode } from 'react';
 import type { WindowState } from '../state/store';
 import { APP_META, closeWindow, focusWindow, minimizeWindow, moveWindow, resizeWindow, toggleMaximize } from '../state/windows';
 import { toLogical, viewport } from './viewport';
+import { px } from './pixel';
 
 interface Props {
   win: WindowState;
@@ -56,7 +57,7 @@ export function Window({ win, active, children }: Props) {
       }}
     >
       <div className="win-title" onPointerDown={onTitleDown} onPointerMove={onTitleMove} onPointerUp={onTitleUp} onDoubleClick={() => toggleMaximize(win.id)}>
-        <img src={meta.icon} alt="" />
+        <img src={px(meta.icon)} alt="" />
         <span className="t">{win.title}</span>
         <div className="win-btns">
           <button className="win-btn" onClick={() => minimizeWindow(win.id)} title="Свернуть">

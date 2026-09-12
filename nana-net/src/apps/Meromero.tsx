@@ -9,6 +9,7 @@ import { Chat } from './Chat';
 import { CONTACT_INFO } from './contacts';
 import { REN_SONG, SONGS } from '../story/fs';
 import { commentOptions, postOptions, replyOptions, statusOptions, type CommentOption } from '../story/social';
+import { px } from '../os/pixel';
 
 type Page = 'feed' | 'profile' | 'messages' | 'user';
 
@@ -59,7 +60,7 @@ export function Meromero({ win }: { win: WindowState }) {
     <div className="mm">
       <div className="mm-top">
         <div className="mm-logo clickable" role="button" onClick={() => nav('feed')}>
-          <img src="/assets/icons/meromero.png" alt="" />
+          <img src={px('/assets/icons/meromero.png')} alt="" />
           meromero
         </div>
         <div className="mm-tabs">
@@ -265,7 +266,7 @@ function PostView({ post, nav }: { post: Post; nav: Nav }) {
         {post.photo && <img className="photo" src={renderPhoto(post.photo, 320, 240)} alt="" />}
         <div className="mm-actions">
           <span className={post.author === 'nana' ? '' : 'clickable'} role="button" onClick={like} title={post.likedBy?.length ? post.likedBy.join(', ') : undefined}>
-            <img src={liked ? '/assets/mm/heart-small.png' : '/assets/mm/heart-grey.png'} alt="" /> {post.likes}
+            <img src={px(liked ? '/assets/mm/heart-small.png' : '/assets/mm/heart-grey.png')} alt="" /> {post.likes}
           </span>
           <span className={opts.length ? 'clickable' : ''} role="button" onClick={() => opts.length && setCommenting((c) => !c)}>
             коммент ({post.comments.length}){opts.length ? ' · ответить' : ''}
@@ -309,7 +310,7 @@ function Profile({ nav }: { nav: Nav }) {
       <Sidebar nav={nav} />
       <div className="mm-main">
         <div className="mm-card">
-          <div className="mm-banner" style={{ backgroundImage: `url(/assets/mm/banner-${s.profile.theme}.png)` }}>
+          <div className="mm-banner" style={{ backgroundImage: `url(${px(`/assets/mm/banner-${s.profile.theme}.png`)})` }}>
             <img className="av" src={avatar(AVATARS[s.profile.avatar] ?? 'nana', 64)} alt="" />
           </div>
           <div className="mm-profile-info">
@@ -445,7 +446,7 @@ function UserPage({ user, nav }: { user: string; nav: Nav }) {
       <Sidebar nav={nav} />
       <div className="mm-main">
         <div className="mm-card">
-          <div className="mm-banner" style={{ backgroundImage: `url(/assets/mm/banner-${isRen ? 'city' : 'sakura'}.png)`, filter: isRen ? 'grayscale(0.6) brightness(0.7)' : undefined }}>
+          <div className="mm-banner" style={{ backgroundImage: `url(${px(`/assets/mm/banner-${isRen ? 'city' : 'sakura'}.png`)})`, filter: isRen ? 'grayscale(0.6) brightness(0.7)' : undefined }}>
             <img className="av" src={avatar(authorAvatar(user, 0), 64)} alt="" />
           </div>
           <div className="mm-profile-info">
@@ -537,7 +538,7 @@ function Register({ onEnter }: { onEnter: () => void }) {
     <div className="mm mm-reg">
       <div className="mm-top">
         <div className="mm-logo">
-          <img src="/assets/icons/meromero.png" alt="" />
+          <img src={px('/assets/icons/meromero.png')} alt="" />
           meromero
         </div>
         <div className="mm-user">meromero.net · 2011 · β</div>
@@ -547,7 +548,7 @@ function Register({ onEnter }: { onEnter: () => void }) {
           <>
             <div className="mm-card mm-reg-card">
               <div className="mm-reg-hero">
-                <img src="/assets/icons/meromero.png" alt="" />
+                <img src={px('/assets/icons/meromero.png')} alt="" />
                 <h2>meromero</h2>
                 <p>твоя страница. твоя музыка. свои люди.</p>
               </div>
@@ -636,7 +637,7 @@ function Register({ onEnter }: { onEnter: () => void }) {
               <label>шапка</label>
               <div className="mm-themes">
                 {(['sakura', 'city'] as const).map((t) => (
-                  <div key={t} className={`mm-theme clickable ${theme === t ? 'active' : ''}`} role="button" onClick={() => (playSound('click'), setTheme(t))} style={{ backgroundImage: `url(/assets/mm/banner-${t}.png)` }}>
+                  <div key={t} className={`mm-theme clickable ${theme === t ? 'active' : ''}`} role="button" onClick={() => (playSound('click'), setTheme(t))} style={{ backgroundImage: `url(${px(`/assets/mm/banner-${t}.png`)})` }}>
                     <span>{t === 'sakura' ? 'сакура' : 'город'}</span>
                   </div>
                 ))}

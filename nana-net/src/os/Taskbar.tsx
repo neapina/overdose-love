@@ -4,6 +4,7 @@ import { goToSleep, remainingToday } from '../story/engine';
 import { homeworkLeft } from '../story/school';
 import { playSound } from './sounds';
 import { canFullscreen, requestFullscreen, TOUCH, useFullscreen } from './viewport';
+import { px } from './pixel';
 
 export function Taskbar() {
   const s = useGameState();
@@ -31,15 +32,15 @@ export function Taskbar() {
       </div>
       <div className="tasks">
         <div className="task pinned clickable" role="button" title="Проводник" onClick={() => openWindow('explorer')}>
-          <img src="/assets/icons/folder-documents.png" alt="" />
+          <img src={px('/assets/icons/folder-documents.png')} alt="" />
         </div>
         <div className="task pinned clickable" role="button" title={s.flags.mm_registered ? 'meromero' : 'meromero · создать страницу'} onClick={() => openWindow('meromero', unread ? { page: 'messages', contact: s.unread.ren > 0 ? 'ren' : 'mayu' } : undefined)}>
-          <img src="/assets/icons/meromero.png" alt="" />
+          <img src={px('/assets/icons/meromero.png')} alt="" />
           {unread > 0 && <span className="badge">{unread}</span>}
           {!s.flags.mm_registered && <span className="badge soft">!</span>}
         </div>
         <div className="task pinned clickable" role="button" title={hwLeft ? `Уроки · осталось ${hwLeft}` : 'Уроки'} onClick={() => openWindow('homework')}>
-          <img src="/assets/mm/book.png" alt="" />
+          <img src={px('/assets/mm/book.png')} alt="" />
           {hwLeft > 0 && isAfternoon(s) && <span className="badge soft">{hwLeft}</span>}
         </div>
         {s.windows.map((w) => (
@@ -52,7 +53,7 @@ export function Taskbar() {
               else focusWindow(w.id);
             }}
           >
-            <img src={APP_META[w.app].icon} alt="" />
+            <img src={px(APP_META[w.app].icon)} alt="" />
             <span>{w.title}</span>
           </div>
         ))}
@@ -73,7 +74,7 @@ export function Taskbar() {
               setState({ sleepPrompt: true });
             }}
           >
-            <img src="/assets/mm/moon.png" alt="" />
+            <img src={px('/assets/mm/moon.png')} alt="" />
           </span>
         )}
         {TOUCH && !fullscreen && canFullscreen() && (
@@ -95,7 +96,7 @@ export function Taskbar() {
       </div>
       {s.sleepPrompt && (
         <div className="sleep-prompt" onPointerDown={(e) => e.stopPropagation()}>
-          <img src="/assets/mm/moon.png" alt="" />
+          <img src={px('/assets/mm/moon.png')} alt="" />
           <div>
             <b>{st >= 2 ? 'Лечь? Он может ещё написать.' : 'Лечь спать?'}</b>
             <span>

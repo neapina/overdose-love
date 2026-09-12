@@ -5,6 +5,7 @@ import { buildFs, resolvePath, type FsNode } from '../story/fs';
 import { renderPhoto } from '../story/photos';
 import { openNode } from '../os/open';
 import { openOn } from '../os/viewport';
+import { px } from '../os/pixel';
 
 export function Explorer({ win }: { win: WindowState }) {
   const s = useGameState();
@@ -55,7 +56,7 @@ export function Explorer({ win }: { win: WindowState }) {
         <div className="explorer-side">
           {fs.children!.map((c) => (
             <div key={c.name} className={`clickable ${path[1] === c.name ? 'active' : ''}`} role="button" onClick={() => go(['Компьютер', c.name])}>
-              <img src={c.icon} alt="" />
+              <img src={px(c.icon)} alt="" />
               {c.name}
             </div>
           ))}
@@ -63,7 +64,7 @@ export function Explorer({ win }: { win: WindowState }) {
         <div className={`explorer-main ${items.length ? '' : 'empty'}`}>
           {items.map((n, i) => (
             <div key={`${n.name}_${i}`} className="fitem clickable" role="button" {...openOn(() => open(n))}>
-              {n.kind === 'image' ? <img className="thumb" src={renderPhoto(n.photo!, 112, 84)} alt="" /> : <img src={n.icon} alt="" />}
+              {n.kind === 'image' ? <img className="thumb" src={renderPhoto(n.photo!, 112, 84)} alt="" /> : <img src={px(n.icon)} alt="" />}
               <span>{n.name}</span>
             </div>
           ))}

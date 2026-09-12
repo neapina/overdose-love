@@ -3,8 +3,8 @@ import { playSound } from '../os/sounds';
 
 const WALLPAPERS: { id: 'day' | 'dusk' | 'night'; name: string; style: React.CSSProperties }[] = [
   { id: 'day', name: 'Утро (по умолчанию)', style: { background: 'linear-gradient(180deg,#a9d3f5,#e9d5e2)' } },
-  { id: 'dusk', name: 'Город, вечер', style: { backgroundImage: 'url(/assets/wallpaper-dusk.jpg)' } },
-  { id: 'night', name: 'Город, ночь', style: { backgroundImage: 'url(/assets/wallpaper-night.jpg)' } },
+  { id: 'dusk', name: 'Город, вечер', style: { backgroundImage: 'var(--wp-dusk, url(/assets/wallpaper-dusk.jpg))' } },
+  { id: 'night', name: 'Город, ночь', style: { backgroundImage: 'var(--wp-night, url(/assets/wallpaper-night.jpg))' } },
 ];
 
 export function Personalize() {

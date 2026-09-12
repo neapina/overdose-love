@@ -11,6 +11,7 @@ import { Thought, Toasts } from './Toasts';
 import { AppView } from '../apps/AppView';
 import { topWindowId } from '../state/windows';
 import { TOUCH } from './viewport';
+import { px } from './pixel';
 
 export function Desktop() {
   const s = useGameState();
@@ -51,7 +52,7 @@ export function Desktop() {
               if (!TOUCH) openNode(n, ['Компьютер', 'Рабочий стол']);
             }}
           >
-            <img src={n.icon} alt="" />
+            <img src={px(n.icon)} alt="" />
             <span>{n.name}</span>
           </div>
         ))}
