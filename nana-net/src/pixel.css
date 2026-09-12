@@ -1,0 +1,878 @@
+/* NANA.NET — pixel layer. Loaded last: hard edges, pixel fonts, no blur, no rounding. */
+
+:root {
+  --font: 'Pixelify Sans', 'DotGothic16', 'M PLUS 1p', sans-serif;
+  --mono: 'Pixelify Sans', 'DotGothic16', monospace;
+  --pixel: 'Pixelify Sans', 'DotGothic16', monospace;
+  --tiny: 'Tiny5', 'Pixelify Sans', monospace;
+  --arcade: 'Press Start 2P', 'Pixelify Sans', monospace;
+  --hard: 3px 3px 0 rgba(0, 0, 0, 0.55);
+  --bevel: inset 1px 1px 0 rgba(255, 255, 255, 0.35), inset -1px -1px 0 rgba(0, 0, 0, 0.45);
+  --bevel-in: inset 1px 1px 0 rgba(0, 0, 0, 0.45), inset -1px -1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.screen {
+  font-size: 15px;
+  line-height: 1.35;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+  text-rendering: optimizeSpeed;
+}
+
+.screen *,
+.screen *::before,
+.screen *::after {
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.screen img,
+.screen canvas,
+.desktop,
+.login::before,
+.mm-banner,
+.mm-theme,
+.wp-opt,
+.boot-logo,
+.thumb,
+.photo {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.screen img {
+  filter: none !important;
+}
+
+button,
+input,
+select {
+  font-family: var(--font);
+  font-size: inherit;
+}
+
+/* ───────── effects: keep the night, lose the blur ───────── */
+.fx-scanlines {
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px);
+}
+
+.fx-vignette {
+  background: none;
+  box-shadow:
+    inset 0 0 0 2px #000,
+    inset 0 0 0 4px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 8px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 14px rgba(0, 0, 0, 0.12);
+}
+
+.fx-tracking {
+  height: 72px;
+  background: linear-gradient(180deg, transparent 0 25%, rgba(200, 225, 255, 0.06) 25% 50%, rgba(255, 255, 255, 0.09) 50% 62%, rgba(200, 225, 255, 0.06) 62% 80%, transparent 80%);
+  animation: tracking 13s steps(90) infinite;
+}
+
+.fx-tint {
+  mix-blend-mode: normal;
+  background: rgba(40, 24, 70, 0.1);
+}
+
+@keyframes screen-jitter {
+  0%,
+  47%,
+  47.9%,
+  83%,
+  83.4%,
+  100% {
+    transform: none;
+  }
+  47.3% {
+    transform: translateX(2px);
+  }
+  47.6% {
+    transform: translateX(-2px);
+  }
+  83.2% {
+    transform: translateY(2px);
+  }
+}
+
+.chroma {
+  text-shadow:
+    -1px 0 #ff5a8c,
+    1px 0 #5adcff,
+    2px 2px 0 #000;
+}
+
+/* ───────── boot ───────── */
+.boot {
+  font: 15px/1.4 var(--tiny);
+  padding: 22px 30px;
+}
+
+.boot-bios .ok {
+  color: #7fe0a2;
+}
+
+.boot-cursor::after {
+  animation-timing-function: steps(1);
+}
+
+.boot-seven .boot-text {
+  font: 16px var(--arcade);
+  letter-spacing: 0;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.boot-seven .boot-bar {
+  border: 2px solid #4a5678;
+  background: #0a0c14;
+  box-shadow: none;
+}
+
+.boot-seven .boot-bar > div {
+  background: repeating-linear-gradient(90deg, #7fb6e8 0 6px, #5a8fc4 6px 8px);
+  box-shadow: none;
+}
+
+/* ───────── login ───────── */
+.login::before {
+  background-image: var(--wp-night, url('/assets/wallpaper-night.jpg'));
+  filter: brightness(0.45) saturate(0.8);
+  transform: none;
+}
+
+.login::after {
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 1px, transparent 1px 2px);
+}
+
+.login-avatar {
+  border: 2px solid #eef0ff;
+  box-shadow:
+    0 0 0 4px #0a0c14,
+    0 0 0 6px #6b7aa0,
+    6px 6px 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.login-name {
+  font: 22px var(--arcade);
+  letter-spacing: 0;
+  text-shadow:
+    -2px 0 #ff5a8c,
+    2px 0 #5adcff,
+    3px 3px 0 #000;
+}
+
+.login-input,
+.input {
+  height: 32px;
+  border: 2px solid #6b7aa0;
+  box-shadow: var(--bevel-in);
+  font-family: var(--font);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.login-input:focus,
+.input:focus {
+  border-color: #7fe0ff;
+  box-shadow: var(--bevel-in);
+}
+
+.login-go {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #0a0c14;
+  background: #2c3350;
+  box-shadow: var(--bevel);
+}
+
+.login-hint,
+.login-error {
+  font-size: 14px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.login-footer {
+  font: 10px var(--arcade);
+  letter-spacing: 0;
+}
+
+.welcome {
+  font: 18px var(--arcade);
+  text-shadow: 2px 2px 0 #000;
+}
+
+.sticky,
+.sticky-2,
+.gadget-note {
+  transform: none;
+  font: 15px/1.35 var(--font);
+  border: 2px solid rgba(60, 40, 20, 0.35);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  background-image: none;
+}
+
+.sticky::before,
+.gadget-note::before {
+  transform: none;
+  border: 0;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.sticky-2 {
+  font-size: 13px;
+}
+
+.sticky-pw {
+  font: 20px/1.3 var(--pixel);
+  letter-spacing: 0.25em;
+  border-bottom: 2px solid #2a2340;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.sticky-doodle {
+  filter: none;
+  image-rendering: pixelated;
+}
+
+/* ───────── desktop ───────── */
+.desktop.wp-day,
+.desktop.wp-dusk {
+  background-image: var(--wp-dusk, url('/assets/wallpaper-dusk.jpg'));
+}
+
+.desktop.wp-night {
+  background-image: var(--wp-night, url('/assets/wallpaper-night.jpg'));
+}
+
+.desktop::before {
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 4px);
+}
+
+.icon {
+  font-size: 14px;
+  line-height: 1.2;
+  text-shadow: 1px 1px 0 #000, 2px 2px 0 rgba(0, 0, 0, 0.6);
+  border: 1px solid transparent;
+}
+
+.icon:hover,
+.icon.selected {
+  border: 1px dotted #cfd8ff;
+}
+
+.icon img {
+  width: 48px;
+  height: 48px;
+}
+
+.gadget-clock {
+  font: 20px/1 var(--arcade);
+  letter-spacing: 0;
+  padding: 10px 12px;
+  background: #0a0c14;
+  border: 2px solid #4a5678;
+  box-shadow: var(--hard);
+  text-shadow:
+    -2px 0 #ff5a8c,
+    2px 0 #5adcff;
+}
+
+.gadget-clock small {
+  font: 13px var(--font);
+  letter-spacing: 0;
+  margin-top: 6px;
+}
+
+/* ───────── windows ───────── */
+.win {
+  background: #1a1e2e;
+  border: 2px solid #0a0c14;
+  box-shadow:
+    inset 0 0 0 1px #6b7aa0,
+    5px 5px 0 rgba(0, 0, 0, 0.6);
+}
+
+.win.inactive {
+  background: #23263a;
+}
+
+.win-title {
+  font-size: 15px;
+  text-shadow: 1px 1px 0 #000;
+  letter-spacing: 0;
+}
+
+.win-btn {
+  width: 26px;
+  height: 20px;
+  border: 1px solid #0a0c14;
+  background: #3a4260;
+  box-shadow: var(--bevel);
+  font-size: 13px;
+}
+
+.win-btn:hover {
+  background: #4c5680;
+}
+
+.win-btn.close {
+  background: #b3372c;
+}
+
+.win-btn.close:hover {
+  background: #d24a3c;
+}
+
+.win-body {
+  border: 2px solid #0a0c14;
+}
+
+.menubar,
+.toolbar,
+.statusbar {
+  background: #e9e4d8;
+  font-size: 14px;
+}
+
+.btn {
+  padding: 4px 12px;
+  border: 2px solid #3a3745;
+  background: #f3efe6;
+  box-shadow: var(--bevel), 2px 2px 0 rgba(0, 0, 0, 0.35);
+  font-size: 15px;
+}
+
+.btn:hover {
+  background: #fff;
+}
+
+.btn:active {
+  box-shadow: var(--bevel-in);
+  transform: translate(1px, 1px);
+}
+
+.btn.primary {
+  background: #7fb6e8;
+  color: #101828;
+}
+
+.btn.pink {
+  background: #f2a7c3;
+  color: #3a1828;
+}
+
+.explorer-side div,
+.fitem,
+.music-list div,
+.sm-app,
+.photos-list img,
+.wp-opt {
+  border: 2px solid transparent;
+}
+
+.explorer-side div.active,
+.music-list div.active,
+.fitem:hover,
+.wp-opt.active {
+  border-color: #3a3745;
+  box-shadow: none;
+}
+
+.music-bar {
+  height: 10px;
+  border: 2px solid #3a3745;
+  background: #fff;
+}
+
+.music-bar > div {
+  background: repeating-linear-gradient(90deg, #d9578f 0 4px, #f2a7c3 4px 6px);
+}
+
+.music-ctrl button {
+  border: 2px solid #3a3745;
+  box-shadow: var(--bevel);
+  font-size: 14px;
+}
+
+.notepad,
+.notepad textarea {
+  font: 15px/1.5 var(--font);
+}
+
+/* ───────── taskbar / start ───────── */
+.taskbar {
+  background: #0d1020;
+  border-top: 2px solid #4a5678;
+  box-shadow: none;
+}
+
+.start .orb {
+  width: 30px;
+  height: 30px;
+  background: #2a6fd1;
+  border: 2px solid #0a0c14;
+  box-shadow: var(--bevel), 0 0 0 1px #7fb6e8;
+}
+
+.start .orb::before,
+.start .orb::after {
+  display: none;
+}
+
+.task {
+  border: 2px solid #2a2f45;
+  background: #141829;
+  box-shadow: var(--bevel);
+  font-size: 14px;
+}
+
+.task:hover {
+  background: #232a45;
+}
+
+.task.active {
+  background: #2c3350;
+  border-color: #6b7aa0;
+  box-shadow: var(--bevel-in);
+}
+
+.tray .clock {
+  font: 15px/1.2 var(--pixel);
+  letter-spacing: 0;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.tray .clock small {
+  font-size: 12px;
+}
+
+.tray .ren-status {
+  font-size: 13px;
+  border: 1px solid #4a5678;
+}
+
+.startmenu {
+  background: #1a1e2e;
+  border: 2px solid #0a0c14;
+  box-shadow: inset 0 0 0 1px #6b7aa0, 6px 6px 0 rgba(0, 0, 0, 0.6);
+}
+
+.sm-app {
+  font-size: 15px;
+}
+
+.sm-app:hover {
+  border-color: #3a3745;
+}
+
+.sm-right .lnk {
+  font-size: 15px;
+}
+
+.sm-right .av {
+  border: 2px solid #eef0ff;
+}
+
+.sm-shutdown button {
+  border: 2px solid #0a0c14;
+  background: #2c3350;
+  box-shadow: var(--bevel);
+  font-size: 14px;
+}
+
+.show-desktop {
+  border-left: 2px solid #4a5678;
+}
+
+/* ───────── toasts / inner voice ───────── */
+.toast {
+  background: #0e1120;
+  border: 2px solid #6b7aa0;
+  border-left: 5px solid var(--pink);
+  box-shadow: 4px 4px 0 #000;
+}
+
+.toast.actionable:hover {
+  background: #171c30;
+}
+
+.toast b {
+  font: 13px var(--pixel);
+  letter-spacing: 0;
+}
+
+.toast span {
+  font-size: 14px;
+}
+
+.toast small {
+  font-size: 12px;
+}
+
+.thought {
+  font: 17px/1.4 var(--font);
+  padding: 8px 16px;
+  background: rgba(5, 6, 10, 0.88);
+  border: 2px solid #2a2f45;
+  box-shadow: 4px 4px 0 #000;
+  text-shadow: 1px 1px 0 #000;
+  animation: thought-in 0.2s steps(3), thought-out 0.4s steps(4) 5.5s forwards;
+}
+
+.thought::before {
+  display: none;
+}
+
+.thought .caret {
+  width: 8px;
+  height: 15px;
+}
+
+.sleep-prompt {
+  background: #0e1120;
+  border: 2px solid #6b7aa0;
+  box-shadow: 6px 6px 0 #000;
+}
+
+.sleep-prompt b {
+  font-size: 16px;
+}
+
+.sleep h1,
+.ending h1 {
+  font: 24px/1.5 var(--arcade);
+  letter-spacing: 0;
+  text-shadow: 3px 3px 0 #000;
+}
+
+.interlude-head {
+  font: 14px var(--arcade);
+  letter-spacing: 0;
+}
+
+.interlude-lines p {
+  font: 17px/1.55 var(--font);
+}
+
+.interlude-go,
+.interlude-skip {
+  font-size: 15px;
+}
+
+.ending .stats {
+  font: 14px/1.8 var(--pixel);
+}
+
+/* ───────── chat ───────── */
+.chat-head .nm {
+  font-size: 16px;
+}
+
+.chat-head img.av {
+  border: 2px solid #3a3745;
+}
+
+.bubble {
+  font-size: 15px;
+  border: 2px solid #3a3745;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.bubble .time {
+  font-size: 11px;
+}
+
+.choice,
+.choices.quiet .choice {
+  font-size: 15px;
+  border: 2px solid #3a3745;
+  box-shadow: var(--bevel), 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.choice:hover {
+  transform: none;
+}
+
+.choice:active {
+  box-shadow: var(--bevel-in);
+  transform: translate(1px, 1px);
+}
+
+.chip {
+  font-size: 14px;
+  border: 2px solid #d9a9c2;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.chat-hint {
+  font-size: 13px;
+}
+
+/* ───────── homework notebook ───────── */
+.hw {
+  font-size: 15px;
+}
+
+.hw-head b {
+  font-size: 18px;
+}
+
+.hw-item {
+  border: 2px solid transparent;
+}
+
+.hw-item:hover {
+  border-color: #3a3745;
+}
+
+.hw-box {
+  border: 2px solid #3a3745;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.hw-kind,
+.hw-sub {
+  font-size: 13px;
+}
+
+.hw-q {
+  font-size: 16px;
+}
+
+/* ───────── meromero ───────── */
+.mm {
+  font-size: 15px;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.4) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0 2px, transparent 2px 8px),
+    #f4e3ea;
+}
+
+.mm-top {
+  background: #f2bcd2;
+  border-bottom: 2px solid #b8688c;
+  box-shadow: inset 0 2px 0 #fbe0ea;
+}
+
+.mm-logo {
+  font: 14px var(--arcade);
+  letter-spacing: 0;
+  text-shadow: 2px 2px 0 #fff;
+}
+
+.mm-logo::after {
+  animation: kira 1.2s steps(2) infinite;
+  text-shadow: none;
+  color: #fff;
+}
+
+.mm-logo img {
+  border: 1px solid #a8306a;
+  box-shadow: none;
+}
+
+.mm-tabs button {
+  font-size: 15px;
+  border: 2px solid #b8688c;
+  border-bottom: 0;
+  background: #f9dfe8;
+  padding: 3px 12px 6px;
+}
+
+.mm-tabs button.active {
+  background: #fdf3f6;
+  font-weight: 400;
+}
+
+.mm-user {
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+.mm-card {
+  border: 2px solid #d9a8bf;
+  box-shadow: 3px 3px 0 #e6c6d3;
+}
+
+.mm-card h4 {
+  background: #f6d6e2;
+  border-bottom: 2px dotted #c98aa6;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.mm-counter {
+  font: 14px/1.6 var(--pixel);
+  letter-spacing: 0;
+}
+
+.mm-counter b {
+  font-size: 18px;
+}
+
+.mm-counter small {
+  font-size: 12px;
+}
+
+.mm-banner {
+  border-bottom: 2px solid #d9a8bf;
+}
+
+.mm-banner .av,
+.mm-post .av,
+.mm-friend img.av,
+.mm-avatars img,
+.avatar-opt,
+.chat-head img.av,
+.mm-preview img.av,
+.mm-reg-hero .av {
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #a8306a;
+}
+
+.avatar-opt.active,
+.mm-avatars img.active {
+  box-shadow: 0 0 0 2px #d9578f;
+}
+
+.mm-profile-info b {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.mm-status {
+  font-size: 15px;
+}
+
+.mm-post {
+  border-bottom: 2px dotted #d9a8bf;
+}
+
+.mm-post .who {
+  font-size: 16px;
+  letter-spacing: 0;
+}
+
+.mm-post .when {
+  font-size: 12px;
+}
+
+.mm-post .photo {
+  transform: none;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #d9a8bf, 4px 4px 0 2px rgba(120, 60, 90, 0.2);
+}
+
+.mm-actions {
+  font-size: 14px;
+}
+
+.mm-comment {
+  border-left: 3px solid #f0c2d5;
+  border-bottom: 1px dotted #e3c4d2;
+}
+
+.mm-comment b {
+  font-size: 14px;
+}
+
+.mm-friend {
+  font-size: 15px;
+  border-bottom: 2px dotted #ecd6df;
+}
+
+.mm-fakeinput {
+  border: 2px solid #d9a8bf;
+  box-shadow: var(--bevel-in);
+  font-size: 15px;
+}
+
+.mm-reg-hero h2 {
+  font: 16px/1.6 var(--arcade);
+  letter-spacing: 0;
+  text-shadow: 2px 2px 0 #fff;
+}
+
+.mm-reg-hero p,
+.mm-news .pad div,
+.mm-form label,
+.mm-note {
+  font-size: 15px;
+}
+
+.mm-captcha-img {
+  image-rendering: pixelated;
+  border: 2px solid #3a3745;
+}
+
+.mm-theme {
+  border: 2px solid transparent;
+}
+
+.mm-theme.active {
+  border-color: #a8306a;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.mm-preview b {
+  font-size: 16px;
+}
+
+/* ───────── scrollbars ───────── */
+.screen ::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+.screen ::-webkit-scrollbar-track {
+  background: repeating-linear-gradient(45deg, #dcd6ca 0 2px, #ece7dc 2px 4px);
+  border-left: 2px solid #3a3745;
+}
+
+.screen ::-webkit-scrollbar-thumb {
+  background: #b9b3c4;
+  border: 2px solid #3a3745;
+  box-shadow: var(--bevel);
+}
+
+.screen ::-webkit-scrollbar-thumb:hover {
+  background: #cfc9d8;
+}
+
+.mm ::-webkit-scrollbar-track {
+  background: repeating-linear-gradient(45deg, #f6d6e2 0 2px, #fbeaf0 2px 4px);
+  border-left-color: #b8688c;
+}
+
+.mm ::-webkit-scrollbar-thumb {
+  background: #e9a9c3;
+  border-color: #b8688c;
+}
+
+/* ───────── dialogs / misc ───────── */
+.dialog {
+  border: 2px solid #0a0c14;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.6);
+}
+
+.wp-opt {
+  border: 2px solid #3a3745;
+}
+
+.wp-opt.active {
+  box-shadow: 0 0 0 2px #7fb6e8;
+}
+
+.photos-view img,
+.photos-list img,
+.thumb {
+  border: 2px solid #3a3745;
+  box-shadow: none;
+}
+
+.rotate-hint {
+  font: 14px/1.8 var(--arcade);
+}
